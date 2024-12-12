@@ -3,9 +3,7 @@ import { initContract } from "@ts-rest/core";
 import { contactInputSchema, contactSchema } from "./types/index.ts";
 import { apiErrorResponseSchema } from "../../shared/index.ts";
 
-const c = initContract();
-
-export const contract = c.router({
+export const contract = initContract().router({
   postContact: {
     method: "POST",
     path: "/",

@@ -1,10 +1,16 @@
 import { z } from 'zod';
 
 // StringMap schema
-export const stringMapSchema = z.record(z.string());
+export const stringMapSchema: z.ZodRecord = z.record(z.string());
 
 // APIErrorResponse schema
-export const apiErrorResponseSchema = z.object({
+type ApiErrorResponseSchemaType =  z.ZodObject<{
+  statusCode: z.ZodNumber;
+  message: z.ZodString;
+  error: z.ZodString;
+  details: z.ZodOptional<z.ZodRecord>;
+}>;
+export const apiErrorResponseSchema: ApiErrorResponseSchemaType = z.object({
   statusCode: z.number(),
   message: z.string(),
   error: z.string(),

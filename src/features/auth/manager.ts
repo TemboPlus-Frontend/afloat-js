@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { AuthRepository } from "./repository/auth.ts";
 import type { User } from "./types/index.ts";
@@ -9,7 +9,7 @@ export class AuthManager {
   private static _instance: AuthManager;
   private constructor() {}
 
-  public static get instance() {
+  public static get instance(): AuthManager {
     return this._instance || (this._instance = new this());
   }
 
@@ -57,8 +57,11 @@ type State = { user: User | undefined; token: string | undefined };
 
 const initialState: State = { user: undefined, token: undefined };
 
-// deno-lint-ignore no-explicit-any
-export const store = create<State & Actions, any>(
+export const store: UseBoundStore<StoreApi<State & Actions>> = create<
+  State & Actions,
+  // deno-lint-ignore no-explicit-any
+  any
+>(
   persist(
     (set) => ({
       ...initialState,

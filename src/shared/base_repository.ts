@@ -3,7 +3,7 @@ import { ApiError } from "./types/api_error.ts";
 import type { APIErrorResponse } from "./index.ts";
 import { v4 as uuidv4 } from "uuid";
 import { AuthManager } from "../../mod.ts";
-import type { InitClientArgs } from "@ts-rest/core";
+import type { AppRoute, AppRouteFunction, ClientArgs, InitClientArgs } from "@ts-rest/core";
 
 const BASE_CLIENT_PARAMS: InitClientArgs = {
   baseUrl: "https://api.afloat.money/v1",
@@ -13,8 +13,12 @@ const BASE_CLIENT_PARAMS: InitClientArgs = {
   },
 };
 
+type RecursiveProxyObj<T extends AppRouter, TClientArgs extends ClientArgs> = {
+  [TKey in keyof T]: T[TKey] extends AppRoute ? AppRouteFunction<T[TKey], TClientArgs> : T[TKey] extends AppRouter ? RecursiveProxyObj<T[TKey], TClientArgs> : never;
+};
+
 export class BaseRepository<TContract extends AppRouter> {
-  protected client;
+  protected client/* : RecursiveProxyObj<TContract, InitClientArgs>; */
 
   constructor(contract: TContract) {
     this.client = initClient(contract, BASE_CLIENT_PARAMS);

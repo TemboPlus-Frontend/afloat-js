@@ -2,9 +2,7 @@ import { z } from "zod";
 import { initContract } from "@ts-rest/core";
 import { identitySchema, userSchema } from "./types/user.ts";
 
-const c = initContract();
-
-export const authContract = c.router({
+export const authContract = initContract().router({
   logIn: {
     method: "POST",
     path: "/login",
@@ -29,7 +27,7 @@ export const authContract = c.router({
   },
 });
 
-export const identityContract = c.router({
+export const identityContract = initContract().router({
   getUserCredentials: {
     method: "GET",
     path: "/me",
