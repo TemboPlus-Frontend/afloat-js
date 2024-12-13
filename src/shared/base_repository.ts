@@ -5,14 +5,6 @@ import { AfloatAuth } from "../../mod.ts";
 import type { InitClientArgs } from "@ts-rest/core";
 import type { Common400APIResponse } from "@shared/index.ts";
 
-const BASE_CLIENT_PARAMS: InitClientArgs = {
-  baseUrl: "https://api.afloat.money/v1",
-  baseHeaders: {
-    "token": AfloatAuth.instance.getUserToken() ?? "",
-    "x-request-id": uuidv4(),
-  },
-};
-
 /**
  * BaseRepository
  *
@@ -24,11 +16,11 @@ const BASE_CLIENT_PARAMS: InitClientArgs = {
  */
 export class BaseRepository<TContract extends AppRouter> {
   /**
-   * A "ts-rest" client
+   * A "ts-rest" contract
    *
    * @protected
    */
-  protected client;
+  protected contract: TContract;
 
   /**
    * Constructs a new instance of `BaseRepository`.
@@ -36,7 +28,19 @@ export class BaseRepository<TContract extends AppRouter> {
    * @param contract - The "ts-rest" contract
    */
   constructor(contract: TContract) {
-    this.client = initClient(contract, BASE_CLIENT_PARAMS);
+    this.contract = contract;
+  }
+
+  get client() {
+    const args: InitClientArgs = {
+      baseUrl: "https://api.afloat.money/v1",
+      baseHeaders: {
+        "token": AfloatAuth.instance.getUserToken() ?? "",
+        "x-request-id": uuidv4(),
+      },
+    };
+
+    return initClient(this.contract, args);
   }
 
   /**
