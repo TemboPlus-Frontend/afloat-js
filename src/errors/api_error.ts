@@ -1,16 +1,16 @@
-import type { APIErrorResponse, StringMap } from "./api_response.ts";
+import type { APIErrorResponse } from "../shared/api/common_responses.ts";
 
 // For runtime error handling
-export class ApiError extends Error {
+export class APIError extends Error {
   public readonly statusCode: number;
   public readonly error?: string;
-  public readonly details?: StringMap;
+  public readonly details?: APIErrorResponse["details"];
 
   constructor(args: {
     message: string;
     statusCode: number;
     error?: string;
-    details?: StringMap;
+    details?: APIErrorResponse["details"];
   }) {
     super(args.message);
     this.name = "ApiError";
@@ -20,13 +20,8 @@ export class ApiError extends Error {
     if (args.details) this.details = args.details;
   }
 
-  // Factory method to create from API response
-  static fromResponse(response: APIErrorResponse): ApiError {
-    return new ApiError(response);
-  }
-
   // Helper to check if an error is an ApiError
-  static isApiError(error: unknown): error is ApiError {
-    return error instanceof ApiError;
+  static isApiError(error: unknown): error is APIError {
+    return error instanceof APIError;
   }
 }

@@ -25,7 +25,7 @@ type userType = z.ZodObject<{
   access: z.ZodArray<z.ZodString>;
   resetPassword: z.ZodBoolean;
 }>;
-export const userSchema: userType = z.object({
+export const coreUserSchema: userType = z.object({
   profile: profileSchema,
   token: z.string(),
   access: z.array(z.string()),
@@ -40,7 +40,3 @@ export const identitySchema: IdentityType = z.object({
   name: z.string(),
   identity: z.string(),
 });
-
-export type Profile = z.infer<typeof profileSchema>;
-export type UserIdentity = z.infer<typeof identitySchema>;
-export type User = z.infer<typeof userSchema> & UserIdentity;

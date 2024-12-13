@@ -44,8 +44,3 @@ export const contactSchema: _Contact = z.object({
   updatedAt: z.coerce.date(),
 }).merge(contactInputSchema);
 
-export type Contact = z.infer<typeof contactSchema>;
-
-export type ContactInput = z.infer<typeof contactInputSchema>;
-
-export type ContactChannel = z.infer<typeof contactChannelSchema>;

@@ -1,15 +1,15 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { AuthRepository } from "./repository/auth.ts";
-import type { User } from "./types/index.ts";
+import { AuthRepository } from "./repository.ts";
+import type { User } from "../../models/index.ts";
 
 const AUTH_STORE_SESSION_STORAGE_KEY = "auth-store";
 
-export class AuthManager {
-  private static _instance: AuthManager;
+export class AfloatAuth {
+  private static _instance: AfloatAuth;
   private constructor() {}
 
-  public static get instance(): AuthManager {
+  public static get instance(): AfloatAuth {
     return this._instance || (this._instance = new this());
   }
 
@@ -18,18 +18,18 @@ export class AuthManager {
   }
 
   getUserToken(): string | undefined {
-    return store.getState().token;
+    return this.currentUser?.token;
   }
 
-  getUser(): User | undefined {
+  get currentUser(): User | undefined {
     return store.getState().user;
   }
 
   async logIn(email: string, password: string): Promise<User> {
-    const result = await this.repo.logIn(email, password);
+    const user = await this.repo.logIn(email, password);
     this.clearSavedData();
-    store.getState().setUser(result.user, result.token);
-    return result.user;
+    store.getState().setUser(user);
+    return user;
   }
 
   async resetPassword(current: string, updated: string): Promise<boolean> {
@@ -49,13 +49,13 @@ export class AuthManager {
 }
 
 interface Actions {
-  setUser: (user: User, token: string) => void;
+  setUser: (user: User) => void;
   refresh: () => void;
 }
 
-type State = { user: User | undefined; token: string | undefined };
+type State = { user: User | undefined };
 
-const initialState: State = { user: undefined, token: undefined };
+const initialState: State = { user: undefined };
 
 export const store: UseBoundStore<StoreApi<State & Actions>> = create<
   State & Actions,
@@ -65,7 +65,8 @@ export const store: UseBoundStore<StoreApi<State & Actions>> = create<
   persist(
     (set) => ({
       ...initialState,
-      setUser: (user, token) => set({ user, token }),
+
+      setUser: (user) => set({ user }),
       refresh: () => set(initialState),
     }),
     {

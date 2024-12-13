@@ -1,8 +1,11 @@
-import { ApiError } from "../../shared/types/api_error.ts";
+import type { ClientInferResponseBody } from "@ts-rest/core";
+import { APIError } from "../../errors/api_error.ts";
 import { BaseRepository } from "../../shared/base_repository.ts";
 import { DEFAULT_ORDER_BY_DESC } from "../../shared/index.ts";
 import { contract } from "./contract.ts";
-import type { Contact, ContactInput, GetContactsArgs } from "./types/index.ts";
+import type { ContactInput, Contact } from "../../models/contact/types.ts";
+
+type GetContactsArgs = ClientInferResponseBody<typeof contract.getContacts>
 
 export class ContactRepository extends BaseRepository<typeof contract> {
   constructor() {
@@ -33,7 +36,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
     const query = { rangeStart, rangeEnd, orderByDesc: DEFAULT_ORDER_BY_DESC };
 
     if (rangeEnd <= rangeStart) {
-      throw new ApiError({
+      throw new APIError({
         message: "Please check your range",
         statusCode: 404,
         error: "Invalid Range",

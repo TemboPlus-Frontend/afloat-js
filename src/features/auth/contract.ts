@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { initContract } from "@ts-rest/core";
-import { identitySchema, userSchema } from "./types/user.ts";
+import { coreUserSchema, identitySchema } from "../../models/user/schemas.ts";
 
 export const authContract = initContract().router({
   logIn: {
@@ -12,7 +12,7 @@ export const authContract = initContract().router({
       password: z.string(),
     }),
     responses: {
-      201: userSchema,
+      201: coreUserSchema,
       400: z.object({}),
     },
   },

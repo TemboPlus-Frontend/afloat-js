@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { initContract } from "@ts-rest/core";
-import { contactInputSchema, contactSchema } from "./types/index.ts";
-import { apiErrorResponseSchema } from "../../shared/index.ts";
+import { commonAPIResponses } from "../../shared/index.ts";
+import {
+  contactInputSchema,
+  contactSchema,
+} from "../../models/contact/index.ts";
 
 export const contract = initContract().router({
   postContact: {
@@ -41,7 +44,5 @@ export const contract = initContract().router({
     },
   },
 }, {
-  commonResponses: {
-    400: apiErrorResponseSchema,
-  },
+  commonResponses: commonAPIResponses,
 });
