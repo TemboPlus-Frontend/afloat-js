@@ -2,6 +2,7 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { AuthRepository } from "./repository.ts";
 import { User } from "../../models/index.ts";
+import type { Permission } from "@models/permission.ts";
 
 const AUTH_STORE_SESSION_STORAGE_KEY = "auth-store";
 
@@ -23,6 +24,10 @@ export class AfloatAuth {
 
   get currentUser(): User | undefined {
     return store.getState().getUser();
+  }
+
+  checkPermission(perm: Permission): boolean {
+    return this.currentUser?.can(perm) ?? false;
   }
 
   async logIn(email: string, password: string): Promise<User> {
