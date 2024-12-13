@@ -9,6 +9,16 @@ import type { Profile } from "@models/user/profile.ts";
  */
 export class User {
   /**
+   * Logged-in user name
+   */
+  public name: string;
+
+  /**
+   * Logged-in identity: phone-number or email address
+   */
+  public identity: string;
+
+  /**
    * The user's Afloat profile, containing personal information such as name, contact details, and account information.
    */
   public profile: Profile;
@@ -44,12 +54,19 @@ export class User {
     token: string;
     access: string[];
     resetPassword: boolean;
+    loginCredentials: {
+      name: string;
+      identity: string;
+    };
   }) {
     const { profile, token, access, resetPassword } = data;
 
     this.profile = profile;
     this.token = token;
     this.resetPassword = resetPassword;
+
+    this.name = data.loginCredentials.name;
+    this.identity = data.loginCredentials.identity;
 
     // Initialize the permissions map
     this.permissionsMap = {};
@@ -86,6 +103,8 @@ export class User {
       profile: this.profile,
       token: this.token,
       resetPassword: this.resetPassword,
+      name: this.name,
+      identity: this.identity,
       permissions: Object.keys(this.permissionsMap).filter(
         (key) => this.permissionsMap[key],
       ),
@@ -105,6 +124,8 @@ export class User {
     if (
       !data.profile ||
       !data.token ||
+      !data.name ||
+      !data.identity ||
       !Array.isArray(data.permissions) ||
       typeof data.resetPassword !== "boolean"
     ) {
@@ -117,6 +138,10 @@ export class User {
       token: data.token,
       access: data.permissions,
       resetPassword: data.resetPassword,
+      loginCredentials: {
+        name: data.name,
+        identity: data.identity,
+      },
     };
 
     return new User(args);

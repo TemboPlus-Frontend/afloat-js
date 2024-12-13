@@ -19,4 +19,7 @@ export const profileSchema: ProfileType = z.object({
   email: z.string(),
 });
 
+/**
+ * User Afloat profile
+ */
 export type Profile = z.infer<typeof profileSchema>;

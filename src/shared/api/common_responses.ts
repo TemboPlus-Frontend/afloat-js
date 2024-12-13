@@ -1,8 +1,6 @@
 import type { AppRouteResponse } from "@ts-rest/core";
 import { z } from "zod";
 
-/* Common Responses */
-
 /* Common 400 API Error Response */
 type ApiErrorResponseSchemaType = z.ZodObject<{
   statusCode: z.ZodNumber;
