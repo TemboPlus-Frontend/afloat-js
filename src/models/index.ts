@@ -1,5 +1,3 @@
-export * from "./permission.ts"
-export * from "./user/index.ts"
-export * from "./contact/index.ts"
-
-
+export * from "@models/permission.ts"
+export * from "@models/user/index.ts"
+export * from "@models/contact/index.ts"

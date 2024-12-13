@@ -1,58 +1,57 @@
-// import { Permissions } from "../permission.ts";
-// import type { CoreUser, Profile } from "./types.ts";
+import { Permissions } from "@models/permission.ts";
+import type { Profile } from "@models/user/profile.ts";
 
-// const P = Permissions;
-
-// export class User {
-//   public profile: Profile;
-//   public token: string;
-//   public resetPassword: boolean;
-
-//   private permissionsMap: Record<string, boolean>;
-
-//   constructor(userData: CoreUser) {
-//     const { profile, token, access, resetPassword } = userData;
-
-//     this.profile = profile;
-//     this.token = token;
-//     this.resetPassword = resetPassword;
-
-//     this.permissionsMap = {
-//       [P.Payout.Approve]: access.includes(P.Payout.Approve),
-//       [P.Payout.Create]: access.includes(P.Payout.Create),
-//       [P.Payout.List]: access.includes(P.Payout.List),
-//       [P.Contact.Create]: access.includes(P.Contact.Create),
-//       [P.Contact.Update]: access.includes(P.Contact.Update),
-//       [P.Contact.Delete]: access.includes(P.Contact.Delete),
-//       [P.Contact.List]: access.includes(P.Contact.List),
-//       [P.Wallet.ViewBalance]: access.includes(P.Wallet.ViewBalance),
-//       [P.Wallet.ViewStatement]: access.includes(P.Wallet.ViewStatement),
-//     };
-//   }
-
-//   // Dynamically checking permissions
-//   public can(permission: string): boolean {
-//     return this.permissionsMap[permission] ?? false;
-//   }
-// }
-import { Permissions } from "../permission.ts";
-import type { CoreUser, Profile } from "./types.ts";
-
+/**
+ * Represents a user in Afloat
+ *
+ * This class centralizes user-related logic, simplifying interaction
+ * with user-related data and ensuring consistent permission checks across the application.
+ */
 export class User {
+  /**
+   * The user's Afloat profile, containing personal information such as name, contact details, and account information.
+   */
   public profile: Profile;
+
+  /**
+   * The user's authentication token. This token must be passed in the request headers
+   * for all authenticated API endpoints.
+   */
   public token: string;
+
+  /**
+   * Indicates whether the user is required to change their default password.
+   *
+   * Afloat users are initially provided with a default username and password. After the first
+   * successful login, `resetPassword` will be set to `true` to prompt the user to set a new password.
+   */
   public resetPassword: boolean;
 
+  /**
+   * A map of permission keys to boolean values, indicating whether the user has access
+   * to specific actions or features in the system.
+   */
   private permissionsMap: Record<string, boolean>;
 
-  constructor(userData: CoreUser) {
-    const { profile, token, access, resetPassword } = userData;
+  /**
+   * Creates a new instance of the `User` class.
+   *
+   * @param userData - An object of type `CoreUser` containing the user's profile, token,
+   * permissions (access list), and the `resetPassword` flag.
+   */
+  constructor(data: {
+    profile: Profile;
+    token: string;
+    access: string[];
+    resetPassword: boolean;
+  }) {
+    const { profile, token, access, resetPassword } = data;
 
     this.profile = profile;
     this.token = token;
     this.resetPassword = resetPassword;
 
-    // Initialize permissions map
+    // Initialize the permissions map
     this.permissionsMap = {};
     for (const permission of Object.values(Permissions)) {
       if (typeof permission === "object") {
@@ -63,12 +62,25 @@ export class User {
     }
   }
 
-  // Dynamically checking permissions
+  /**
+   * Checks if the user has a specific permission.
+   *
+   * @param permission - The permission key to check.
+   * @returns `true` if the user has the specified permission, otherwise `false`.
+   */
   public can(permission: string): boolean {
     return this.permissionsMap[permission] ?? false;
   }
 
-  // Convert class instance to JSON
+  /**
+   * Serializes the `User` instance to a JSON string.
+   *
+   * @returns A JSON string representation of the `User` instance, including:
+   * - `profile`: The user's profile information.
+   * - `token`: The user's authentication token.
+   * - `resetPassword`: Indicates whether the user must reset their password.
+   * - `permissions`: An array of permission keys the user has.
+   */
   public toJSON(): string {
     return JSON.stringify({
       profile: this.profile,
@@ -80,7 +92,13 @@ export class User {
     });
   }
 
-  // Construct a User instance from JSON
+  /**
+   * Creates a new `User` instance from a JSON string.
+   *
+   * @param jsonString - A JSON string containing user data.
+   * @returns A `User` instance reconstructed from the JSON data.
+   * @throws Will throw an error if the JSON data is invalid or incomplete.
+   */
   public static fromJSON(jsonString: string): User {
     const data = JSON.parse(jsonString);
 
@@ -94,13 +112,13 @@ export class User {
     }
 
     // Reconstruct the CoreUser structure
-    const coreUser: CoreUser = {
+    const args = {
       profile: data.profile,
       token: data.token,
       access: data.permissions,
       resetPassword: data.resetPassword,
     };
 
-    return new User(coreUser);
+    return new User(args);
   }
 }

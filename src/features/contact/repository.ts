@@ -1,9 +1,9 @@
 import type { ClientInferResponseBody } from "@ts-rest/core";
 import { APIError } from "../../errors/api_error.ts";
-import { BaseRepository } from "../../shared/base_repository.ts";
-import { DEFAULT_ORDER_BY_DESC } from "../../shared/index.ts";
+import { BaseRepository } from "@shared/base_repository.ts";
+import { DEFAULT_ORDER_BY_DESC } from "@shared/index.ts";
 import { contract } from "./contract.ts";
-import type { ContactInput, Contact } from "../../models/contact/types.ts";
+import type { ContactInput, Contact } from "@models/contact/types.ts";
 
 type GetContactsArgs = ClientInferResponseBody<typeof contract.getContacts>
 

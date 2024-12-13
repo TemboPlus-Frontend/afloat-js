@@ -1,7 +1,7 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { AuthRepository } from "./repository.ts";
-import type { User } from "../../models/index.ts";
+import { User } from "../../models/index.ts";
 
 const AUTH_STORE_SESSION_STORAGE_KEY = "auth-store";
 
@@ -22,7 +22,7 @@ export class AfloatAuth {
   }
 
   get currentUser(): User | undefined {
-    return store.getState().user;
+    return store.getState().getUser();
   }
 
   async logIn(email: string, password: string): Promise<User> {
@@ -50,10 +50,11 @@ export class AfloatAuth {
 
 interface Actions {
   setUser: (user: User) => void;
+  getUser: () => User | undefined;
   refresh: () => void;
 }
 
-type State = { user: User | undefined };
+type State = { user: string | undefined };
 
 const initialState: State = { user: undefined };
 
@@ -63,10 +64,20 @@ export const store: UseBoundStore<StoreApi<State & Actions>> = create<
   any
 >(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
 
-      setUser: (user) => set({ user }),
+      getUser: () => {
+        try {
+          const jsonUser = get().user;
+          if (jsonUser) return User.fromJSON(jsonUser);
+        } catch (_) {
+          console.log(_);
+        }
+
+        return undefined;
+      },
+      setUser: (user) => set({ user: user.toJSON() }),
       refresh: () => set(initialState),
     }),
     {

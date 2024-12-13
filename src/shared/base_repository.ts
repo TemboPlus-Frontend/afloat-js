@@ -3,7 +3,7 @@ import { APIError } from "../errors/api_error.ts";
 import { v4 as uuidv4 } from "uuid";
 import { AfloatAuth } from "../../mod.ts";
 import type { InitClientArgs } from "@ts-rest/core";
-import type { Common400APIResponse } from "./index.ts";
+import type { Common400APIResponse } from "@shared/index.ts";
 
 const BASE_CLIENT_PARAMS: InitClientArgs = {
   baseUrl: "https://api.afloat.money/v1",

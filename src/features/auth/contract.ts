@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { initContract } from "@ts-rest/core";
-import { coreUserSchema, identitySchema } from "../../models/user/schemas.ts";
+import { profileSchema } from "@models/index.ts";
 
 export const authContract = initContract().router({
   logIn: {
@@ -12,7 +12,12 @@ export const authContract = initContract().router({
       password: z.string(),
     }),
     responses: {
-      201: coreUserSchema,
+      201: z.object({
+        profile: profileSchema,
+        token: z.string(),
+        access: z.array(z.string()),
+        resetPassword: z.boolean(),
+      }),
       400: z.object({}),
     },
   },
@@ -32,7 +37,10 @@ export const identityContract = initContract().router({
     method: "GET",
     path: "/me",
     responses: {
-      200: identitySchema,
+      200: z.object({
+        name: z.string(),
+        identity: z.string(),
+      }),
     },
   },
 });

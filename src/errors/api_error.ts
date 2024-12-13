@@ -1,16 +1,14 @@
-import type { APIErrorResponse } from "../shared/api/common_responses.ts";
-
 // For runtime error handling
 export class APIError extends Error {
   public readonly statusCode: number;
   public readonly error?: string;
-  public readonly details?: APIErrorResponse["details"];
+  public readonly details?: Record<string, unknown>;
 
   constructor(args: {
     message: string;
     statusCode: number;
     error?: string;
-    details?: APIErrorResponse["details"];
+    details?: Record<string, unknown>;
   }) {
     super(args.message);
     this.name = "ApiError";
