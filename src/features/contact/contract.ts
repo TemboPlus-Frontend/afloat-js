@@ -6,6 +6,9 @@ import {
   contactSchema,
 } from "@models/contact/index.ts";
 
+/**
+ * Contact API contract
+ */
 export const contract = initContract().router({
   postContact: {
     method: "POST",

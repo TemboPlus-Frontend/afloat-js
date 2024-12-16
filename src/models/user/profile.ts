@@ -9,6 +9,10 @@ type ProfileType = z.ZodObject<{
   accountNo: z.ZodString;
   email: z.ZodString;
 }>;
+
+/**
+ * Profile Zod Schema
+ */
 export const profileSchema: ProfileType = z.object({
   id: z.string(),
   firstName: z.string(),

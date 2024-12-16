@@ -1,3 +1,6 @@
+/**
+ * All Afloat Permissions
+ */
 export const Permissions = {
   Profile: {
     ViewCurrent: "profile.getCurrent",
@@ -33,6 +36,9 @@ export const Permissions = {
   },
 } as const; // Make it deeply readonly
 
+/**
+ * Permission Type
+ */
 export type Permission =
   | typeof Permissions.Profile[keyof typeof Permissions.Profile]
   | typeof Permissions.Contact[keyof typeof Permissions.Contact]

@@ -2,6 +2,9 @@ import { z } from "zod";
 import { initContract } from "@ts-rest/core";
 import { profileSchema } from "@models/index.ts";
 
+/**
+ * Auth API contract
+ */
 export const authContract = initContract().router({
   logIn: {
     method: "POST",
