@@ -39,7 +39,7 @@ export class AuthRepository extends BaseRepository<typeof authContract> {
 
     if (result.status === 201) {
       const repo = new LoginRepository();
-      const loginCredentials = await repo.getIdentity();
+      const loginCredentials = await repo.getIdentity(result.body.token);
 
       const user: User = new User({ ...result.body, loginCredentials });
       return user;
@@ -97,8 +97,9 @@ class LoginRepository extends BaseRepository<typeof identityContract> {
    * @returns A promise that resolves to the user's login credentials on success.
    * @throws {APIError} If an error occurs while retrieving the credentials.
    */
-  async getIdentity(): Promise<GetUserIdentityResponse> {
-    const result = await this.client.getUserCredentials();
+  async getIdentity(token: string): Promise<GetUserIdentityResponse> {
+    const headers = { token };
+    const result = await this.client.getUserCredentials({ headers });
     if (result.status === 200) return result.body;
 
     throw new APIError({
