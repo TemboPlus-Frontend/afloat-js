@@ -1,4 +1,4 @@
-import type { ClientInferResponseBody } from "@ts-rest/core";
+import type { ClientInferResponseBody } from "@npm/ts_rest.ts";
 import { APIError } from "@errors/api_error.ts";
 import { BaseRepository } from "@shared/base_repository.ts";
 import { DEFAULT_ORDER_BY_DESC } from "@shared/index.ts";

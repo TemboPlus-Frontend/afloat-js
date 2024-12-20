@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { initContract } from "@ts-rest/core";
+import { z } from "@npm/zod.ts";
+import { initContract } from "@npm/ts_rest.ts";
 import { commonAPIResponses } from "@shared/index.ts";
 import {
   contactInputSchema,

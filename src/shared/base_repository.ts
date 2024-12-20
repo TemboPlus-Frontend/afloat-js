@@ -1,9 +1,9 @@
-import { type AppRouter, initClient } from "@ts-rest/core";
-import { APIError } from "../errors/api_error.ts";
-import { v4 as uuidv4 } from "uuid";
-import { AfloatAuth } from "../../mod.ts";
-import type { InitClientArgs } from "@ts-rest/core";
+import { type AppRouter, initClient } from "@npm/ts_rest.ts";
+import { APIError } from "@errors/api_error.ts";
+import { v4 as uuidv4 } from "@npm/uuid.ts";
+import type { InitClientArgs } from "@npm/ts_rest.ts";
 import type { Common400APIResponse } from "@shared/index.ts";
+import { AfloatAuth } from "@features/auth/index.ts";
 
 /**
  * BaseRepository
@@ -12,7 +12,7 @@ import type { Common400APIResponse } from "@shared/index.ts";
  * This class initializes a "ts-rest" client using a specified "ts-rest" contract and provides
  * helper methods to handle API responses consistently.
  *
- * @template TContract - The API contract extending `AppRouter` from `@ts-rest/core`.
+ * @template TContract - The API contract extending `AppRouter` from `@npm/ts_rest.ts`.
  */
 export class BaseRepository<TContract extends AppRouter> {
   /**

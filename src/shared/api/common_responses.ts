@@ -1,5 +1,5 @@
-import type { AppRouteResponse } from "@ts-rest/core";
-import { z } from "zod";
+import type { AppRouteResponse } from "@npm/ts_rest.ts";
+import { z } from "@npm/zod.ts";
 
 /* Common 400 API Error Response */
 type ApiErrorResponseSchemaType = z.ZodObject<{

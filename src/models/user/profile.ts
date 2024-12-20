@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@npm/zod.ts";
 
 type ProfileType = z.ZodObject<{
   id: z.ZodString;

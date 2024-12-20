@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from "@npm/zod.ts";
 import type {
   contactChannelSchema,
   contactInputSchema,
