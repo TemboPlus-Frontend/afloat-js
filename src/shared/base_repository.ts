@@ -23,17 +23,26 @@ export class BaseRepository<TContract extends AppRouter> {
   protected contract: TContract;
 
   /**
+   * An API endpoint
+   *
+   * @protected
+   */
+  protected endpoint: string;
+
+  /**
    * Constructs a new instance of `BaseRepository`.
    *
    * @param contract - The "ts-rest" contract
+   * @param endpoint - API endpoint
    */
-  constructor(contract: TContract) {
+  constructor(endpoint: string, contract: TContract) {
     this.contract = contract;
+    this.endpoint = endpoint;
   }
 
   get client() {
     const args: InitClientArgs = {
-      baseUrl: "https://api.afloat.money/v1",
+      baseUrl: `https://api.afloat.money/v1/${this.endpoint}`,
       baseHeaders: {
         "token": AfloatAuth.instance.getUserToken() ?? "",
         "x-request-id": uuidv4(),

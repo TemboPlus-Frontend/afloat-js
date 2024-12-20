@@ -17,7 +17,7 @@ export class AuthRepository extends BaseRepository<typeof authContract> {
    * Initializes an instance of AuthRepository.
    */
   constructor() {
-    super(authContract);
+    super("auth", authContract);
   }
 
   /**
@@ -89,7 +89,7 @@ class LoginRepository extends BaseRepository<typeof identityContract> {
    * Initializes an instance of LoginRepository.
    */
   constructor() {
-    super(identityContract);
+    super("login", identityContract);
   }
 
   /**

@@ -19,7 +19,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
    * Creates an instance of `ContactRepository` using the contact contract.
    */
   constructor() {
-    super(contract);
+    super("contact", contract);
   }
 
   /**
