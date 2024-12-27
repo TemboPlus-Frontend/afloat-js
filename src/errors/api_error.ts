@@ -1,3 +1,5 @@
+import { z } from "@npm/zod.ts";
+
 /**
  * Custom error class representing API-related errors.
  * Extends the built-in `Error` class to include additional properties such as `statusCode`, `error`, and `details`.
@@ -50,5 +52,21 @@ export class APIError extends Error {
    */
   static isApiError(error: unknown): error is APIError {
     return error instanceof APIError;
+  }
+
+  static unknown(message?: string): APIError {
+    return new APIError({
+      message: message ?? "An unknown error occurred",
+      statusCode: 502,
+    });
+  }
+
+  static get schema() {
+    return z.object({
+      message: z.string(),
+      statusCode: z.number().int(),
+      error: z.string().optional(),
+      details: z.object({}).optional(),
+    });
   }
 }
