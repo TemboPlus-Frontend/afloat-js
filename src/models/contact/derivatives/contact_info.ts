@@ -56,7 +56,7 @@ export class MobileContactInfo extends BaseContactInfo {
   }
 
   override get displayName(): string {
-    return name;
+    return this.name;
   }
 
   override get accNumber(): string {

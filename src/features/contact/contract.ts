@@ -1,10 +1,7 @@
 import { z } from "@npm/zod.ts";
 import { initContract } from "@npm/ts-rest.ts";
 import { commonAPIResponses } from "@shared/index.ts";
-import {
-  contactInputSchema,
-  contactSchema,
-} from "@models/contact/index.ts";
+import { ContactSchemas } from "@models/index.ts";
 
 /**
  * Contact API contract
@@ -13,17 +10,17 @@ export const contract = initContract().router({
   postContact: {
     method: "POST",
     path: "/",
-    body: contactInputSchema,
+    body: ContactSchemas.contactInput,
     responses: {
-      201: contactSchema,
+      201: ContactSchemas.contactData,
     },
   },
   editContact: {
     method: "PATCH",
     path: "/:id",
-    body: contactInputSchema,
+    body: ContactSchemas.contactInput,
     responses: {
-      200: contactSchema,
+      200: ContactSchemas.contactData,
     },
   },
   getContacts: {
@@ -35,7 +32,7 @@ export const contract = initContract().router({
       orderByDesc: z.string(),
     }),
     responses: {
-      200: z.array(contactSchema),
+      200: z.array(ContactSchemas.contactData),
     },
   },
   deleteContact: {

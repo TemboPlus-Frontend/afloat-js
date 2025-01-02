@@ -1,6 +1,9 @@
 import { z } from "@npm/zod.ts";
 import { PAYOUT_APPROVAL_STATUS, PAYOUT_STATUS } from "@models/payout/enums.ts";
 
+const nullableToUndefined = <T extends z.ZodType>(schema: T) =>
+  schema.nullable().optional().transform((val) => val ?? undefined);
+
 const payoutStatusSchema = z.enum([
   PAYOUT_STATUS.CREATED,
   PAYOUT_STATUS.PAID,
@@ -20,7 +23,7 @@ const basePayoutSchema = z.object({
   msisdn: z.string(),
   amount: z.number(),
   description: z.string(),
-  notes: z.string().nullable().optional(),
+  notes: nullableToUndefined(z.string()).optional(),
 });
 
 const identifierSchema = z.object({
@@ -38,17 +41,18 @@ const payoutSchema = z.object({
   payeeName: z.string(),
   status: payoutStatusSchema,
   statusMessage: z.string(),
-  partnerReference: z.string().nullable().optional(),
+  partnerReference: nullableToUndefined(z.string()).optional(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   approvalStatus: approvalPayoutStatusSchema,
-  createdBy: identifierSchema.nullable().optional(),
-  actionedBy: identifierSchema.nullable().optional(),
+  createdBy: nullableToUndefined(identifierSchema).optional(),
+  actionedBy: nullableToUndefined(identifierSchema).optional(),
 }).merge(basePayoutSchema);
 
 export const PayoutSchemas = {
-  payout: payoutSchema,
-  input: payoutInputSchema,
-  status: payoutStatusSchema,
-  approvalStatus: approvalPayoutStatusSchema,
+  payoutData: payoutSchema,
+  payoutInput: payoutInputSchema,
+  payoutTransactionStatus: payoutStatusSchema,
+  payoutApprovalStatus: approvalPayoutStatusSchema,
+  payoutApprover: identifierSchema,
 };

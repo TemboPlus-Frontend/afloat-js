@@ -46,3 +46,4 @@ export type Permission =
   | typeof Permissions.Payout[keyof typeof Permissions.Payout]
   | typeof Permissions.Transfer[keyof typeof Permissions.Transfer]
   | typeof Permissions.Wallet[keyof typeof Permissions.Wallet];
+

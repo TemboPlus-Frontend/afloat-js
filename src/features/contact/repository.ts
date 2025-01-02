@@ -2,7 +2,7 @@ import type { ClientInferResponseBody } from "../../npm/ts-rest.ts";
 import { APIError } from "@errors/api_error.ts";
 import { BaseRepository } from "@shared/base_repository.ts";
 import { contract } from "@features/contact/contract.ts";
-import type { Contact, ContactInput } from "@models/contact/types.ts";
+import { Contact, type ContactData, type ContactInput } from "@models/contact/index.ts";
 import { AfloatAuth } from "@features/auth/index.ts";
 import { Permissions } from "@models/index.ts";
 import { PermissionError } from "@errors/index.ts";
@@ -27,7 +27,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
    * @returns {Promise<Contact>} A promise that resolves to the newly created contact.
    * @throws {APIError} If the response status code is not 201.
    */
-  async create(data: ContactInput): Promise<Contact> {
+  async create(input: ContactInput): Promise<Contact> {
     if (!AfloatAuth.instance.checkPermission(Permissions.Contact.Create)) {
       throw new PermissionError({
         message: "You are not authorized to add contacts.",
@@ -35,8 +35,9 @@ export class ContactRepository extends BaseRepository<typeof contract> {
       });
     }
 
-    const result = await this.client.postContact({ body: data });
-    return this.handleResponse<Contact>(result, 201);
+    const result = await this.client.postContact({ body: input });
+    const data = this.handleResponse<ContactData>(result, 201);
+    return Contact.create(data);
   }
 
   /**
@@ -46,7 +47,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
    * @returns {Promise<Contact>} A promise that resolves to the updated contact.
    * @throws {APIError} If the response status code is not 200.
    */
-  async edit(id: string, data: ContactInput): Promise<Contact> {
+  async edit(id: string, input: ContactInput): Promise<Contact> {
     if (!AfloatAuth.instance.checkPermission(Permissions.Contact.Update)) {
       throw new PermissionError({
         message: "You are not authorized to update contacts.",
@@ -56,9 +57,10 @@ export class ContactRepository extends BaseRepository<typeof contract> {
 
     const result = await this.client.editContact({
       params: { id },
-      body: data,
+      body: input,
     });
-    return this.handleResponse<Contact>(result, 200);
+    const data = this.handleResponse<ContactData>(result, 200);
+    return Contact.create(data);
   }
 
   /**
@@ -114,6 +116,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
     }
 
     const result = await this.client.getContacts({ query });
-    return this.handleResponse<Contact[]>(result, 200);
+    const data = this.handleResponse<ContactData[]>(result, 200);
+    return Contact.createMany(data);
   }
 }

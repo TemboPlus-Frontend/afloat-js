@@ -7,7 +7,7 @@ export const DEFAULT_PAYOUT_API_EAGER = "[createdBy,actionedBy]";
 export const DEFAULT_ORDER_BY_DESC = "createdAt";
 
 const payout_list_schema = z.object({
-  results: z.array(PayoutSchemas.payout),
+  results: z.array(PayoutSchemas.payoutData),
   total: z.number(),
 });
 
@@ -19,7 +19,7 @@ export const contract = initContract().router({
       rangeStart: z.number(),
       rangeEnd: z.number(),
       eager: z.string(),
-      approvalStatus: PayoutSchemas.approvalStatus.nullable().optional(),
+      approvalStatus: PayoutSchemas.payoutApprovalStatus.nullable().optional(),
       orderByDesc: z.string(),
     }),
     responses: {
@@ -33,7 +33,7 @@ export const contract = initContract().router({
       rangeStart: z.number(),
       rangeEnd: z.number(),
       eager: z.string(),
-      approvalStatus: PayoutSchemas.approvalStatus,
+      approvalStatus: PayoutSchemas.payoutApprovalStatus,
       orderByDesc: z.string(),
     }),
     responses: {
@@ -43,9 +43,9 @@ export const contract = initContract().router({
   postPayout: {
     method: "POST",
     path: "",
-    body: PayoutSchemas.input,
+    body: PayoutSchemas.payoutInput,
     responses: {
-      201: PayoutSchemas.payout,
+      201: PayoutSchemas.payoutData,
       400: APIError.schema,
     },
   },
@@ -57,7 +57,7 @@ export const contract = initContract().router({
       notes: z.string().optional(),
     }),
     responses: {
-      201: PayoutSchemas.payout,
+      201: PayoutSchemas.payoutData,
       404: z.object({}),
       409: z.object({}),
     },

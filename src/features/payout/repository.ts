@@ -1,17 +1,19 @@
 import { BaseRepository } from "@shared/index.ts";
 import { contract } from "@features/payout/contract.ts";
-import type { ClientInferResponseBody } from "../../npm/ts-rest.ts";
 import {
   type GetPayoutsArgs,
-  type Payout,
   PAYOUT_APPROVAL_STATUS,
   type PayoutInput,
 } from "@models/payout/index.ts";
 import { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { APIError, PermissionError } from "@errors/index.ts";
+import { Payout } from "@models/payout/derivatives/payout.ts";
 
-type GetPayoutsResponse = ClientInferResponseBody<typeof contract.getPayouts>;
+interface GetPayoutsResponse {
+  results: Payout[];
+  total: number;
+}
 
 export class PayoutRepository extends BaseRepository<typeof contract> {
   /**
@@ -53,7 +55,12 @@ export class PayoutRepository extends BaseRepository<typeof contract> {
 
     const result = await this.client.getPayouts({ query: query });
 
-    if (result.status === 200) return result.body as GetPayoutsResponse;
+    if (result.status === 200) {
+      return {
+        results: Payout.createMany(result.body.results),
+        total: result.body.total,
+      };
+    }
 
     throw APIError.unknown("An error occured while fetching payouts");
   }
@@ -67,7 +74,7 @@ export class PayoutRepository extends BaseRepository<typeof contract> {
     }
 
     const result = await this.client.postPayout({ body: input });
-    if (result.status === 201) return result.body;
+    if (result.status === 201) return Payout.create(result.body);
     if (result.status === 400) {
       throw new APIError(result.body);
     }
@@ -89,7 +96,7 @@ export class PayoutRepository extends BaseRepository<typeof contract> {
     });
 
     if (result.status === 201) {
-      return result.body;
+      return Payout.create(result.body);
     }
     if (result.status === 404) {
       throw new APIError({ message: "Payout not found", statusCode: 404 });
@@ -118,7 +125,7 @@ export class PayoutRepository extends BaseRepository<typeof contract> {
     });
 
     if (result.status === 201) {
-      return result.body;
+      return Payout.create(result.body);
     }
     if (result.status === 404) {
       throw new APIError({ message: "Payout not found", statusCode: 404 });

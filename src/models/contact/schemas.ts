@@ -4,7 +4,7 @@ import { z } from "@npm/zod.ts";
  * Defines valid contact channel types.
  * Currently supports "Bank" and "Mobile" channels.
  */
-export const contactTypeSchema: z.ZodEnum<["Bank", "Mobile"]> = z.enum([
+const contactTypeSchema: z.ZodEnum<["Bank", "Mobile"]> = z.enum([
   "Bank",
   "Mobile",
 ]);
@@ -24,7 +24,7 @@ type _ContactInput = z.ZodObject<{
  * Schema for validating contact input data.
  * Ensures all required fields are present and properly formatted.
  */
-export const contactInputSchema: _ContactInput = z.object({
+const contactInputSchema: _ContactInput = z.object({
   displayName: z
     .string()
     .min(1, "Display name is required"),
@@ -56,9 +56,18 @@ type _Contact = z.ZodObject<{
  * Schema for validating complete contact objects.
  * Includes both user-provided and system-generated fields.
  */
-export const contactSchema: _Contact = z.object({
+const contactSchema: _Contact = z.object({
   id: z.string().min(1, "Contact id is required"),
   profileId: z.string(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 }).merge(contactInputSchema);
+
+/**
+ * Exposing all contact schemas
+ */
+export const ContactSchemas = {
+  contactData: contactSchema,
+  contactInput: contactInputSchema,
+  contactType: contactTypeSchema,
+};
