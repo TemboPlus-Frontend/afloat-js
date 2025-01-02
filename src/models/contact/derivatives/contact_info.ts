@@ -20,7 +20,6 @@ abstract class BaseContactInfo {
   }
 
   abstract validate(): boolean;
-  abstract getChannelLabel(size?: "short" | "long"): string;
 
   /**
    * Resolves to name for mobile contacts, bank accout name for bank contacts
@@ -31,6 +30,11 @@ abstract class BaseContactInfo {
    * Resolves to phone number for mobile contacts, bank accout number for bank contacts
    */
   abstract get accNumber(): string;
+
+  /**
+   * Resolves to telecom company for mobile contacts, bank short name for bank contacts
+   */
+  abstract get channel(): string;
 }
 
 /**
@@ -59,14 +63,8 @@ export class MobileContactInfo extends BaseContactInfo {
     return this.phoneNumber.getNumberWithFormat(MobileNumberFormat.s255);
   }
 
-  override getChannelLabel(size?: "short" | "long"): string {
-    if (size === "short") {
-      return this.phoneNumber.telecom.company;
-    }
-
-    return `${
-      this.phoneNumber.getNumberWithFormat(MobileNumberFormat.s255)
-    } (${this.phoneNumber.telecom.company})`;
+  override get channel(): string {
+    return this.phoneNumber.telecom.company;
   }
 }
 
@@ -97,11 +95,7 @@ export class BankContactInfo extends BaseContactInfo {
     return this.accNumber;
   }
 
-  override getChannelLabel(size?: "short" | "long"): string {
-    if (size === "long") {
-      return `${this.accNumber} (${this.bank.shortName})`;
-    }
-
+  override get channel(): string {
     return this.bank.shortName;
   }
 }
