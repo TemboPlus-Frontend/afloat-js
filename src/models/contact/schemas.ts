@@ -4,7 +4,10 @@ import { z } from "@npm/zod.ts";
  * Defines valid contact channel types.
  * Currently supports "Bank" and "Mobile" channels.
  */
-export const contactTypeSchema = z.enum(["Bank", "Mobile"]);
+export const contactTypeSchema: z.ZodEnum<["Bank", "Mobile"]> = z.enum([
+  "Bank",
+  "Mobile",
+]);
 
 /**
  * Internal type definition for contact input validation.
