@@ -1,4 +1,4 @@
-import type { ClientInferResponseBody } from "@npm/ts_rest.ts";
+import type { ClientInferResponseBody } from "../../npm/ts-rest.ts";
 import { User } from "@models/index.ts";
 import { BaseRepository } from "@shared/base_repository.ts";
 import { authContract, identityContract } from "@features/auth/contract.ts";

@@ -1,7 +1,6 @@
-import type { ClientInferResponseBody } from "@npm/ts_rest.ts";
+import type { ClientInferResponseBody } from "../../npm/ts-rest.ts";
 import { APIError } from "@errors/api_error.ts";
 import { BaseRepository } from "@shared/base_repository.ts";
-import { DEFAULT_ORDER_BY_DESC } from "@shared/index.ts";
 import { contract } from "@features/contact/contract.ts";
 import type { Contact, ContactInput } from "@models/contact/types.ts";
 import { AfloatAuth } from "@features/auth/index.ts";
@@ -104,7 +103,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
 
     const rangeStart = args?.rangeStart ?? 0;
     const rangeEnd = args?.rangeEnd ?? 1000;
-    const query = { rangeStart, rangeEnd, orderByDesc: DEFAULT_ORDER_BY_DESC };
+    const query = { rangeStart, rangeEnd, orderByDesc: "createdAt" };
 
     if (rangeEnd <= rangeStart) {
       throw new APIError({

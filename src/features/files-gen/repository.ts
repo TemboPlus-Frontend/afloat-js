@@ -4,7 +4,7 @@ import { APIError } from "@errors/api_error.ts";
 import type {
   ClientInferRequest,
   ClientInferResponseBody,
-} from "@npm/ts_rest.ts";
+} from "../../npm/ts-rest.ts";
 
 type GenStatementInput = ClientInferRequest<
   typeof contract.genStatementPDF

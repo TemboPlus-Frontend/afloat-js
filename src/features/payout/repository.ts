@@ -1,6 +1,6 @@
 import { BaseRepository } from "@shared/index.ts";
 import { contract } from "@features/payout/contract.ts";
-import type { ClientInferResponseBody } from "@npm/ts_rest.ts";
+import type { ClientInferResponseBody } from "../../npm/ts-rest.ts";
 import {
   type GetPayoutsArgs,
   type Payout,

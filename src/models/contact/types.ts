@@ -1,21 +1,21 @@
 import type { z } from "@npm/zod.ts";
 import type {
-  contactChannelSchema,
   contactInputSchema,
   contactSchema,
+  contactTypeSchema,
 } from "@models/contact/schemas.ts";
 
 /**
- * Contact Model
+ * Represents a complete contact record.
  */
 export type Contact = z.infer<typeof contactSchema>;
 
 /**
- * Contact-Input Model
+ * Represents user-provided contact information for creation/updates.
  */
 export type ContactInput = z.infer<typeof contactInputSchema>;
 
 /**
- * Contact-Channel Enumeration
+ * Valid contact channel types.
  */
-export type ContactChannel = z.infer<typeof contactChannelSchema>;
+export type ContactType = z.infer<typeof contactTypeSchema>;

@@ -1,5 +1,5 @@
 import { z } from "@npm/zod.ts";
-import { initContract } from "@npm/ts_rest.ts";
+import { initContract } from "@npm/ts-rest.ts";
 import { profileSchema } from "@models/index.ts";
 
 /**

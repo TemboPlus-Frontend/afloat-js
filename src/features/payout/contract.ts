@@ -1,6 +1,6 @@
 import { PayoutSchemas } from "@models/payout/index.ts";
 import { APIError } from "@errors/api_error.ts";
-import { initContract } from "@npm/ts_rest.ts";
+import { initContract } from "../../npm/ts-rest.ts";
 import { z } from "@npm/zod.ts";
 
 export const DEFAULT_PAYOUT_API_EAGER = "[createdBy,actionedBy]";
