@@ -71,6 +71,31 @@ export class Contact {
     return this.data.accountNo;
   }
 
+  get accName(): string {
+    return this.data.displayName;
+  }
+
+  get accNoLabel(): string {
+    const info = this.info;
+    if (info instanceof MobileContactInfo) return "Phone Number";
+    if (info instanceof BankContactInfo) return "Bank Account Number";
+    return "Account Number";
+  }
+
+  get channelLabel(): string {
+    const info = this.info;
+    if (info instanceof MobileContactInfo) return "Channel";
+    if (info instanceof BankContactInfo) return "Bank";
+    return "Channel";
+  }
+
+  get accNameLabel(): string {
+    const info = this.info;
+    if (info instanceof MobileContactInfo) return "Full Name";
+    if (info instanceof BankContactInfo) return "Bank Account Name";
+    return "Display Name";
+  }
+
   /**
    * Creates a Contact instance from raw data
    * @throws {ZodError} if validation fails
