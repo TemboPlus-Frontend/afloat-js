@@ -1,11 +1,29 @@
 import type { RuleObject } from "@npm/antd.ts";
 
 /**
- * Regex pattern to validate account names.
- * The account name must only contain letters and spaces, with a minimum length of 3 characters.
- * @constant {RegExp}
+ * Regular expression to validate account names.
+ *
+ * Key Criteria:
+ * 1. The name must consist of at least two words separated by one or more spaces.
+ * 2. Each word can include only alphabetic characters (`a-z`, `A-Z`) and optional hyphens (`-`).
+ * 3. Both words must have at least two characters.
+ * 4. Allow additional whitespace between words but disallow trailing or leading spaces.
+ * 5. Supports names with hyphens (e.g., "Anna-Marie Johnson" or "Jean-Luc Picard").
+ *
+ * Examples of valid names:
+ * - "John Doe"
+ * - "Anna-Marie Johnson"
+ * - "Jean-Luc Picard"
+ * - "Mary Ann"
+ *
+ * Examples of invalid names:
+ * - "John" (only one name)
+ * - "John D" (family name less than 2 characters)
+ * - "John123 Doe" (contains numeric characters)
+ * - " John Doe " (leading or trailing spaces)
  */
-export const ACCOUNT_NAME_REGEX = /^[A-Za-z\s]{3,}$/;
+const ACCOUNT_NAME_REGEX =
+  /^[A-Za-z]{2,}(-[A-Za-z]{2,})?( [A-Za-z]{2,}(-[A-Za-z]{2,})?)+$/;
 
 /**
  * Regex pattern to validate account numbers.
@@ -53,7 +71,7 @@ export const ACC_NAME_VALIDATOR = (
 
   if (!ACCOUNT_NAME_REGEX.test(value)) {
     throw new Error(
-      "Account name must be at least 3 characters long and contain only letters and spaces.",
+      "Please enter a valid account name. For example: 'John Doe', 'Anna-Marie Smith'",
     );
   }
 };
@@ -63,7 +81,7 @@ export const ACC_NAME_VALIDATOR = (
  * @param {string} [name] The account name to validate.
  * @returns {boolean} `true` if valid, otherwise `false`.
  */
-export const validateBankAccName = (name?: string): boolean => {
+export const validateAccName = (name?: string): boolean => {
   return Boolean(name?.trim().length && ACCOUNT_NAME_REGEX.test(name.trim()));
 };
 

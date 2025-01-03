@@ -5,7 +5,7 @@ import {
   PhoneNumber,
 } from "@temboplus/tembo-core";
 import {
-  validateBankAccName,
+  validateAccName,
   validateBankAccNo,
 } from "@models/contact/validation.ts";
 
@@ -83,7 +83,7 @@ export class BankContactInfo extends BaseContactInfo {
 
   validate(): boolean {
     return this.bank.validate() &&
-      validateBankAccName(this.accName) &&
+      validateAccName(this.accName) &&
       validateBankAccNo(this.accNumber);
   }
 

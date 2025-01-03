@@ -149,18 +149,6 @@ export class Payout {
     }
   }
 
-  static createChannel(receiver: PhoneNumber | BankContactInfo) {
-    if (receiver instanceof PhoneNumber) {
-      return `TZ-${receiver.label.toUpperCase()}-B2C`;
-    }
-
-    if (receiver instanceof BankContactInfo) {
-      return `${receiver.bank.swiftCode}:${receiver.accNo}`;
-    }
-
-    throw new Error("Invalid contact info type");
-  }
-
   /**
    * Converts Payout instance to a plain object
    */

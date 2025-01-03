@@ -130,4 +130,11 @@ export class Contact {
   static isValid(data: unknown): data is ContactData {
     return ContactSchemas.contactData.safeParse(data).success;
   }
+
+  /**
+   * Converts Payout instance to a plain object
+   */
+  toJSON(): ContactData {
+    return { ...this.data };
+  }
 }
