@@ -35,6 +35,12 @@ abstract class BaseContactInfo {
    * Resolves to telecom company for mobile contacts, bank short name for bank contacts
    */
   abstract get channel(): string;
+
+  abstract get displayNameLabel(): string;
+
+  abstract get accNumberLabel(): string;
+
+  abstract get channelLabel(): string;
 }
 
 /**
@@ -65,6 +71,18 @@ export class MobileContactInfo extends BaseContactInfo {
 
   override get channel(): string {
     return this.phoneNumber.telecom.company;
+  }
+
+  override get displayNameLabel(): string {
+    return "Name";
+  }
+
+  override get accNumberLabel(): string {
+    return "Phone Number";
+  }
+
+  override get channelLabel(): string {
+    return "Channel";
   }
 }
 
@@ -97,6 +115,18 @@ export class BankContactInfo extends BaseContactInfo {
 
   override get channel(): string {
     return this.bank.shortName;
+  }
+
+  override get displayNameLabel(): string {
+    return "Acc. Name";
+  }
+
+  override get accNumberLabel(): string {
+    return "Bank Acc. No.";
+  }
+
+  override get channelLabel(): string {
+    return "Bank";
   }
 }
 
