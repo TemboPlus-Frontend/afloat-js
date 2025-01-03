@@ -10,11 +10,6 @@ import { Permissions } from "@models/permission.ts";
 import { APIError, PermissionError } from "@errors/index.ts";
 import { Payout } from "@models/payout/derivatives/payout.ts";
 
-interface GetPayoutsResponse {
-  results: Payout[];
-  total: number;
-}
-
 export class PayoutRepository extends BaseRepository<typeof contract> {
   /**
    * Creates an instance of `PayoutRepository` using the contact contract.
@@ -23,7 +18,10 @@ export class PayoutRepository extends BaseRepository<typeof contract> {
     super("payout", contract);
   }
 
-  async getAll(args?: GetPayoutsArgs): Promise<GetPayoutsResponse> {
+  async getAll(args?: GetPayoutsArgs): Promise<{
+    results: Payout[];
+    total: number;
+  }> {
     if (!AfloatAuth.instance.checkPermission(Permissions.Payout.List)) {
       throw new PermissionError({
         message: "You are not authorized to view payouts.",

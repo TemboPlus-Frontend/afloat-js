@@ -110,7 +110,7 @@ export class BankContactInfo extends BaseContactInfo {
   }
 
   override get accNumber(): string {
-    return this.accNumber;
+    return this.accNo;
   }
 
   override get channel(): string {

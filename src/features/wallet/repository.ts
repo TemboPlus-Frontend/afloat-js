@@ -2,6 +2,7 @@ import { BaseRepository } from "@shared/base_repository.ts";
 import { contract } from "@features/wallet/contract.ts";
 import type {
   STATEMENT_OUTPUT_TYPE,
+  StatementFile,
   Wallet,
   WalletStatementItem,
 } from "@models/wallet/index.ts";
@@ -69,7 +70,7 @@ export class WalletRepo extends BaseRepository<typeof contract> {
       endDate: Date;
       accountNo?: string;
     },
-  ) {
+  ): Promise<StatementFile> {
     return await this.fileGenRepo.downloadStatement({
       start_date: props.startDate,
       end_date: props.endDate,

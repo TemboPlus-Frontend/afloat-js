@@ -5,6 +5,7 @@ import type {
   ClientInferRequest,
   ClientInferResponseBody,
 } from "../../npm/ts-rest.ts";
+import { StatementFile } from "@models/wallet/index.ts";
 
 type GenStatementInput = ClientInferRequest<
   typeof contract.genStatementPDF
@@ -30,7 +31,7 @@ export class AfloatFilesRepo extends BaseRepository<typeof contract> {
 
   async downloadStatement(
     body: GenStatementInput,
-  ): Promise<GenStatementResponse> {
+  ): Promise<StatementFile> {
     const result = await this.client.genStatementPDF({ body });
 
     if (result.status === 201) {
