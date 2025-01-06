@@ -114,13 +114,13 @@ export class Contact {
 
   /**
    * Creates a Contact instance from raw data without throwing
-   * @returns {Contact | undefined} Contact instance or undefined if validation fails
+   * @returns {Contact | null} Contact instance or null if validation fails
    */
-  static createSafe(data: ContactData): Contact | undefined {
+  static createSafe(data: ContactData): Contact | null {
     try {
       return new Contact(data);
     } catch {
-      return;
+      return null;
     }
   }
 

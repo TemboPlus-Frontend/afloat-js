@@ -10,3 +10,8 @@ export type payoutApprovalStatus = z.infer<
 export type payoutTransactionStatus = z.infer<
   typeof PayoutSchemas.payoutTransactionStatus
 >;
+
+export type PayoutChannelCode =
+  | "TZ-BANK-B2C"
+  | "TZ-VERTO-B2C"
+  | `TZ-${string}-B2C`; // Pattern matching for mobile codes
