@@ -1,5 +1,5 @@
 import { Amount, Bank, PhoneNumber } from "@temboplus/tembo-core";
-import { PAYOUT_CHANNEL, type PayoutData } from "@models/payout/index.ts";
+import type { PayoutData } from "@models/payout/index.ts";
 import { PayoutSchemas } from "@models/payout/schemas.ts";
 import {
   BankContactInfo,
@@ -12,6 +12,7 @@ import type {
   payoutTransactionStatus,
 } from "@models/payout/types.ts";
 import { PAYOUT_STATUS } from "@models/payout/enums.ts";
+import { createPayoutChannelCode } from "@models/payout/utils.ts";
 
 /**
  * Payout class that wraps the Zod schema and provides additional functionality
@@ -99,8 +100,8 @@ export class Payout {
     }
 
     // extracting bank contact information
-    const isBankPayout = this.data.channel === PAYOUT_CHANNEL.BANK ||
-      this.data.channel === PAYOUT_CHANNEL.CRDB_NAMED_ACC;
+    const isBankPayout = this.data.channel === createPayoutChannelCode.bank() ||
+      this.data.channel === createPayoutChannelCode.verto();
     if (isBankPayout) {
       // getting bank information from payout msisdn
       const text = this.data.msisdn.trim().split(":");
