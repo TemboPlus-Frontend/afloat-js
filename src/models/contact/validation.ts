@@ -40,18 +40,26 @@ export const ACCOUNT_NUMBER_REGEX = /^[a-zA-Z0-9]{6,20}$/; // Only letters and d
  * @throws Will throw an error if validation fails.
  */
 export const ACC_NUMBER_VALIDATOR = (
-  _: RuleObject,
-  value: string,
-): void => {
-  if (!value) {
-    throw new Error("Account number is required.");
+  rule: RuleObject,
+  value: string | null | undefined,
+): Promise<string | undefined> => {
+  const accNoString = value?.toString().trim();
+
+  // If field is empty/undefined/null
+  if (!accNoString) {
+    // Only throw if the field is required
+    if (rule.required) {
+      return Promise.reject(new Error("Account number is required."));
+    }
+    // If field is not required and empty, validation passes
+    return Promise.resolve(undefined);
   }
 
-  if (!ACCOUNT_NUMBER_REGEX.test(value)) {
-    throw new Error(
-      "Account number must be 6 to 20 digits long and contain only letters and digits.",
-    );
-  }
+  const accNo = removeSpaces(accNoString);
+  const valid = validateBankAccNo(accNo);
+  if (valid) return Promise.resolve(accNo);
+
+  return Promise.reject(new Error("Invalid Account Number Format"));
 };
 
 /**
@@ -62,18 +70,28 @@ export const ACC_NUMBER_VALIDATOR = (
  * @throws Will throw an error if validation fails.
  */
 export const ACC_NAME_VALIDATOR = (
-  _: RuleObject,
+  rule: RuleObject,
   value: string,
-): void => {
-  if (!value) {
-    throw new Error("Account name is required.");
+): Promise<string | undefined> => {
+  const accNameString = value?.toString().trim();
+
+  // If field is empty/undefined/null
+  if (!accNameString) {
+    // Only throw if the field is required
+    if (rule.required) {
+      return Promise.reject(new Error("Account name is required."));
+    }
+    // If field is not required and empty, validation passes
+    return Promise.resolve(undefined);
   }
 
-  if (!ACCOUNT_NAME_REGEX.test(value)) {
-    throw new Error(
-      "Please enter a valid account name. For example: 'John Doe', 'Anna-Marie Smith'",
-    );
-  }
+  const accName = normalizeSpaces(accNameString);
+  const valid = validateAccName(accName);
+  if (valid) return Promise.resolve(accName);
+
+  return Promise.reject(
+    new Error("Invalid account name. Examples: 'John Doe', 'Anna-Marie Smith'"),
+  );
 };
 
 /**
@@ -82,7 +100,9 @@ export const ACC_NAME_VALIDATOR = (
  * @returns {boolean} `true` if valid, otherwise `false`.
  */
 export const validateAccName = (name?: string): boolean => {
-  return Boolean(name?.trim().length && ACCOUNT_NAME_REGEX.test(name.trim()));
+  if (!name) return false;
+  const accName = normalizeSpaces(name);
+  return Boolean(accName.length && ACCOUNT_NAME_REGEX.test(accName));
 };
 
 /**
@@ -94,13 +114,46 @@ export const validateAccName = (name?: string): boolean => {
 export const validateBankAccNo = (accountNumber?: string): boolean => {
   if (!accountNumber) return false;
 
-  const normalizedNumber = accountNumber.trim();
-  const hasNoSpaces = normalizedNumber.split(" ").length === 1;
+  const normalizedNumber = removeSpaces(accountNumber);
 
   return (
     normalizedNumber.length >= 6 && // Ensures minimum length of 6
     normalizedNumber.length <= 20 && // Ensures maximum length of 20
-    hasNoSpaces &&
     ACCOUNT_NUMBER_REGEX.test(normalizedNumber)
   );
 };
+
+/**
+ * Normalizes spaces in a string by replacing multiple consecutive spaces
+ * with a single space, ensuring names are properly formatted.
+ *
+ * @param {string} input - The input string (e.g., a name) to process.
+ * @returns {string} A new string with multiple spaces replaced by a single space.
+ *
+ * @example
+ * normalizeSpaces("John  Doe");        // Returns: "John Doe"
+ * normalizeSpaces("John   M Doe");     // Returns: "John M Doe"
+ * normalizeSpaces("  John   Doe  ");   // Returns: "John Doe" (trims leading and trailing spaces as well)
+ */
+function normalizeSpaces(input: string): string {
+  return input.trim().replace(/\s+/g, " ");
+}
+
+/**
+ * Removes all whitespace characters from the given string.
+ *
+ * This function replaces all occurrences of spaces, tabs, and other
+ * whitespace characters (including multiple spaces) in the input string
+ * with an empty string, effectively removing them.
+ *
+ * @param {string} input - The input string from which spaces should be removed.
+ * @returns {string} A new string with all whitespace characters removed.
+ *
+ * @example
+ * removeSpaces("  Hello   World  ");    // Returns: "HelloWorld"
+ * removeSpaces("NoSpacesHere");         // Returns: "NoSpacesHere"
+ * removeSpaces("   ");                  // Returns: ""
+ */
+function removeSpaces(input: string): string {
+  return input.replace(/\s+/g, "");
+}
