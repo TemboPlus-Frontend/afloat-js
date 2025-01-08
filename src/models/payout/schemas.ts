@@ -1,6 +1,13 @@
 import { z } from "@npm/zod.ts";
 import { PAYOUT_APPROVAL_STATUS, PAYOUT_STATUS } from "@models/payout/enums.ts";
 
+const identifierSchema: z.ZodObject<
+  { name: z.ZodString; identity: z.ZodString }
+> = z.object({
+  name: z.string(),
+  identity: z.string(),
+});
+
 const nullableToUndefined = <T extends z.ZodType>(schema: T) =>
   schema.nullable().optional().transform((val) => val ?? undefined);
 
@@ -24,11 +31,6 @@ const basePayoutSchema = z.object({
   amount: z.number(),
   description: z.string(),
   notes: nullableToUndefined(z.string()).optional(),
-});
-
-const identifierSchema = z.object({
-  name: z.string(),
-  identity: z.string(),
 });
 
 const payoutInputSchema = z.object({
