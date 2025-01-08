@@ -1,18 +1,4 @@
 /**
- * Represents the available channels through which payouts can be processed.
- * @enum {string}
- * @readonly
- */
-export enum PAYOUT_CHANNEL {
-  /** Payment processed through mobile money services */
-  MOBILE = "Mobile",
-  /** Payment processed through traditional banking channels */
-  BANK = "Bank",
-  /** Payment processed through CRDB named account */
-  CRDB_NAMED_ACC = "CRDB_NAMED_ACC",
-}
-
-/**
  * Represents the current status of a payout transaction.
  * @enum {string}
  * @readonly

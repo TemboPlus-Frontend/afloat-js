@@ -3,14 +3,21 @@ import { APIError } from "@errors/api_error.ts";
 import { initContract } from "@npm/ts-rest.ts";
 import { z } from "@npm/zod.ts";
 
+/** Default eager loading settings for payout API */
 export const DEFAULT_PAYOUT_API_EAGER = "[createdBy,actionedBy]";
+
+/** Default sort order for payout listings */
 export const DEFAULT_ORDER_BY_DESC = "createdAt";
 
-const payout_list_schema = z.object({
-  results: z.array(PayoutSchemas.payoutData),
-  total: z.number(),
-});
-
+/**
+ * Payout management API contract
+ * Defines endpoints for creating and managing payouts
+ *
+ * @property {Object} getPayouts - List payouts with filtering (GET /)
+ * @property {Object} getPayoutsByApprovalStatus - List payouts by approval status (GET /)
+ * @property {Object} postPayout - Create new payout (POST /)
+ * @property {Object} approve - Approve/reject payout (POST /:id/approve)
+ */
 export const contract = initContract().router({
   getPayouts: {
     method: "GET",
@@ -23,7 +30,10 @@ export const contract = initContract().router({
       orderByDesc: z.string(),
     }),
     responses: {
-      200: payout_list_schema,
+      200: z.object({
+        results: z.array(PayoutSchemas.payoutData),
+        total: z.number(),
+      }),
     },
   },
   getPayoutsByApprovalStatus: {
@@ -37,7 +47,10 @@ export const contract = initContract().router({
       orderByDesc: z.string(),
     }),
     responses: {
-      200: payout_list_schema,
+      200: z.object({
+        results: z.array(PayoutSchemas.payoutData),
+        total: z.number(),
+      }),
     },
   },
   postPayout: {
@@ -63,3 +76,8 @@ export const contract = initContract().router({
     },
   },
 });
+
+/**
+ * Export type for use in client implementations
+ */
+export type PayoutAPI = typeof contract;

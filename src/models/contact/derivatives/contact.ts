@@ -1,5 +1,8 @@
-import type { ContactData, ContactType } from "@models/contact/types.ts";
-import { ContactSchemas } from "@models/contact/schemas.ts";
+import {
+  type ContactData,
+  ContactSchemas,
+  type ContactType,
+} from "@models/contact/schemas.ts";
 import { MobileContactInfo } from "@models/contact/index.ts";
 import { Bank, PhoneNumber } from "@jsr/temboplus__tembo-core";
 import {
@@ -20,22 +23,53 @@ export class Contact {
     this.data = ContactSchemas.contactData.parse(data);
   }
 
-  // Getters for all properties
+  /**
+   * Unique identifier for the contact
+   */
   get id(): string {
     return this.data.id;
   }
+
+  /**
+   * Profile identifier associated with this contact
+   */
   get profileId(): string {
     return this.data.profileId;
   }
+
+  /**
+   * Display name of the contact
+   */
   get displayName(): string {
     return this.data.displayName;
   }
+
+  /**
+   * Type of contact (Bank or Mobile)
+   */
   get type(): ContactType {
     return this.data.type;
   }
+
+  /**
+   * Creation timestamp of the contact
+   */
   get createdAt(): Date {
     return this.data.createdAt;
   }
+
+  /**
+   * Detailed contact information based on contact type
+   *
+   * @returns {ContactInfo | undefined} Contact information object:
+   * - MobileContactInfo for mobile money contacts
+   * - BankContactInfo for bank contacts
+   * - undefined if contact information cannot be constructed
+   *
+   * @remarks
+   * For mobile contacts, constructs from phone number
+   * For bank contacts, constructs from SWIFT code and account number
+   */
   get info(): ContactInfo | undefined {
     if (this.data.type === "Mobile") {
       const phone = PhoneNumber.from(this.data.accountNo);
@@ -46,7 +80,6 @@ export class Contact {
 
     if (this.data.type === "Bank") {
       const bank = Bank.fromSWIFTCode(this.data.channel);
-
       if (bank) {
         return new BankContactInfo(
           this.data.displayName,
@@ -59,22 +92,48 @@ export class Contact {
     return undefined;
   }
 
+  /**
+   * Payment channel for the contact
+   *
+   * @returns {string} Channel information:
+   * - For valid contacts, returns formatted channel from ContactInfo
+   * - For invalid contacts, falls back to account number
+   */
   get channel(): string {
     const info = this.info;
     if (info) return info.channel;
     return this.data.accountNo;
   }
 
+  /**
+   * Account number for the contact
+   *
+   * @returns {string} Account number:
+   * - For valid contacts, returns formatted account number from ContactInfo
+   * - For invalid contacts, falls back to raw account number
+   */
   get accNo(): string {
     const info = this.info;
     if (info) return info.accNumber;
     return this.data.accountNo;
   }
 
+  /**
+   * Account name for the contact
+   * Always returns the display name
+   */
   get accName(): string {
     return this.data.displayName;
   }
 
+  /**
+   * Label for the account number field based on contact type
+   *
+   * @returns {string} Appropriate label:
+   * - "Phone Number" for mobile contacts
+   * - "Bank Account Number" for bank contacts
+   * - "Account Number" as fallback
+   */
   get accNoLabel(): string {
     const info = this.info;
     if (info instanceof MobileContactInfo) return "Phone Number";
@@ -82,6 +141,14 @@ export class Contact {
     return "Account Number";
   }
 
+  /**
+   * Label for the channel field based on contact type
+   *
+   * @returns {string} Appropriate label:
+   * - "Channel" for mobile contacts
+   * - "Bank" for bank contacts
+   * - "Channel" as fallback
+   */
   get channelLabel(): string {
     const info = this.info;
     if (info instanceof MobileContactInfo) return "Channel";
@@ -89,6 +156,14 @@ export class Contact {
     return "Channel";
   }
 
+  /**
+   * Label for the account name field based on contact type
+   *
+   * @returns {string} Appropriate label:
+   * - "Full Name" for mobile contacts
+   * - "Bank Account Name" for bank contacts
+   * - "Display Name" as fallback
+   */
   get accNameLabel(): string {
     const info = this.info;
     if (info instanceof MobileContactInfo) return "Full Name";

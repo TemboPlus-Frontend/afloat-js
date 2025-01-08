@@ -1,13 +1,13 @@
-import type { ClientInferResponseBody } from "../../npm/ts-rest.ts";
-import { APIError } from "@errors/api_error.ts";
 import { BaseRepository } from "@shared/base_repository.ts";
 import { contract } from "@features/contact/contract.ts";
-import { Contact, type ContactData, type ContactInput } from "@models/contact/index.ts";
+import {
+  Contact,
+  type ContactData,
+  type ContactInput,
+} from "@models/contact/index.ts";
 import { AfloatAuth } from "@features/auth/index.ts";
 import { Permissions } from "@models/index.ts";
 import { PermissionError } from "@errors/index.ts";
-
-type GetContactsArgs = ClientInferResponseBody<typeof contract.getContacts>;
 
 /**
  * Repository class for managing `Contact` data through API interactions.
@@ -23,7 +23,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
 
   /**
    * Creates a new contact record.
-   * @param {ContactInput} data - The data required to create a new contact.
+   * @param {ContactInput} input - The data required to create a new contact.
    * @returns {Promise<Contact>} A promise that resolves to the newly created contact.
    * @throws {APIError} If the response status code is not 201.
    */
@@ -43,7 +43,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
   /**
    * Updates an existing contact record by ID.
    * @param {string} id - The unique identifier of the contact to edit.
-   * @param {ContactInput} data - The data to update the contact with.
+   * @param {ContactInput} input - The data to update the contact with.
    * @returns {Promise<Contact>} A promise that resolves to the updated contact.
    * @throws {APIError} If the response status code is not 200.
    */
@@ -82,20 +82,16 @@ export class ContactRepository extends BaseRepository<typeof contract> {
   }
 
   /**
-   * Retrieves all contacts within the specified range.
-   * If `rangeStart` or `rangeEnd` is not provided, defaults to retrieving the first 1000 contacts.
+   * Retrieves all contacts
    * Results are ordered in descending order by default.
    *
-   * @param {GetContactsArgs} [args] - Optional arguments for contact retrieval:
-   *   - `rangeStart` {number} The start index of the range.
-   *   - `rangeEnd` {number} The end index of the range.
    * @returns {Promise<Contact[]>} A promise that resolves to an array of contacts.
    * @throws {APIError} If the response status code is not 200 or the range is invalid.
    * @example
    * const repository = new ContactRepository();
-   * repository.getAll({ rangeStart: 0, rangeEnd: 10 }).then(contacts => console.log(contacts));
+   * repository.getAll().then(contacts => console.log(contacts));
    */
-  async getAll(args?: GetContactsArgs): Promise<Contact[]> {
+  async getAll(): Promise<Contact[]> {
     if (!AfloatAuth.instance.checkPermission(Permissions.Contact.List)) {
       throw new PermissionError({
         message: "You are not authorized to view contacts.",
@@ -103,18 +99,7 @@ export class ContactRepository extends BaseRepository<typeof contract> {
       });
     }
 
-    const rangeStart = args?.rangeStart ?? 0;
-    const rangeEnd = args?.rangeEnd ?? 1000;
-    const query = { rangeStart, rangeEnd, orderByDesc: "createdAt" };
-
-    if (rangeEnd <= rangeStart) {
-      throw new APIError({
-        message: "Please check your range",
-        statusCode: 404,
-        error: "Invalid Range",
-      });
-    }
-
+    const query = { orderByDesc: "createdAt" };
     const result = await this.client.getContacts({ query });
     const data = this.handleResponse<ContactData[]>(result, 200);
     return Contact.createMany(data);

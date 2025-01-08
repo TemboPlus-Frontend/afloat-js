@@ -1,12 +1,6 @@
 import { z } from "@npm/zod.ts";
 import { initContract } from "@npm/ts-rest.ts";
-import { STATEMENT_OUTPUT_TYPE } from "@models/wallet/enums.ts";
-
-const responseSchema = z.object({
-  file: z.string(),
-  file_extension: z.string(),
-  mime_type: z.string(),
-});
+import { STATEMENT_OUTPUT_TYPE } from "@models/wallet/index.ts";
 
 export const contract = initContract().router({
   genStatementPDF: {
@@ -22,7 +16,11 @@ export const contract = initContract().router({
       ]),
     }),
     responses: {
-      201: responseSchema,
+      201: z.object({
+        file: z.string(),
+        file_extension: z.string(),
+        mime_type: z.string(),
+      }),
       202: z.object({
         message: z.string(),
       }),
@@ -33,7 +31,11 @@ export const contract = initContract().router({
     path: "/account_details",
     body: z.object({}),
     responses: {
-      201: responseSchema,
+      201: z.object({
+        file: z.string(),
+        file_extension: z.string(),
+        mime_type: z.string(),
+      }),
     },
   },
 });

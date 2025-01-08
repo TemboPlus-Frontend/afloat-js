@@ -1,7 +1,7 @@
 import { BaseRepository } from "@shared/index.ts";
-import { contract } from "@features/payout/contract.ts";
+import { contract, type PayoutAPI } from "@features/payout/contract.ts";
 import {
-  type GetPayoutsArgs,
+  type GetPayoutsAPIArgs,
   PAYOUT_APPROVAL_STATUS,
   type PayoutInput,
 } from "@models/payout/index.ts";
@@ -10,7 +10,7 @@ import { Permissions } from "@models/permission.ts";
 import { APIError, PermissionError } from "@errors/index.ts";
 import { Payout } from "@models/payout/derivatives/payout.ts";
 
-export class PayoutRepository extends BaseRepository<typeof contract> {
+export class PayoutRepository extends BaseRepository<PayoutAPI> {
   /**
    * Creates an instance of `PayoutRepository` using the contact contract.
    */
@@ -18,7 +18,7 @@ export class PayoutRepository extends BaseRepository<typeof contract> {
     super("payout", contract);
   }
 
-  async getAll(args?: GetPayoutsArgs): Promise<{
+  async getAll(args?: GetPayoutsAPIArgs): Promise<{
     results: Payout[];
     total: number;
   }> {

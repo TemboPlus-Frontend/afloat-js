@@ -1,8 +1,14 @@
 import { z } from "@npm/zod.ts";
 
 /**
- * Defines valid contact channel types.
- * Currently supports "Bank" and "Mobile" channels.
+ * Schema for contact channel types.
+ *
+ * @remarks
+ * Currently supports two channel types:
+ * - "Bank": For traditional banking channels
+ * - "Mobile": For mobile money channels
+ *
+ * @see {@link ContactType} for the inferred type
  */
 const contactTypeSchema: z.ZodEnum<["Bank", "Mobile"]> = z.enum([
   "Bank",
@@ -10,8 +16,19 @@ const contactTypeSchema: z.ZodEnum<["Bank", "Mobile"]> = z.enum([
 ]);
 
 /**
- * Internal type definition for contact input validation.
- * Used to enforce type consistency in the contactInputSchema.
+ * Valid contact channel types.
+ * Inferred from the contactTypeSchema.
+ *
+ * @see {@link contactTypeSchema} for validation rules
+ */
+export type ContactType = z.infer<typeof ContactSchemas.contactType>;
+
+/**
+ * Schema type definition for contact input validation.
+ *
+ * @internal
+ * This is an internal type used to enforce type consistency
+ * in the contactInputSchema.
  */
 type _ContactInput = z.ZodObject<{
   displayName: z.ZodString;
@@ -21,8 +38,23 @@ type _ContactInput = z.ZodObject<{
 }>;
 
 /**
+ * Type representing user-provided contact information.
+ * Used for creating or updating contacts.
+ *
+ * @see {@link contactInputSchema} for validation rules
+ * @see {@link ContactSchemas} for all available schemas
+ */
+export type ContactInput = z.infer<typeof ContactSchemas.contactInput>;
+
+/**
  * Schema for validating contact input data.
- * Ensures all required fields are present and properly formatted.
+ *
+ * @remarks
+ * Validates the following fields:
+ * - displayName: Non-empty string
+ * - accountNo: Non-empty string
+ * - channel: Non-empty string
+ * - type: Must be either "Bank" or "Mobile"
  */
 const contactInputSchema: _ContactInput = z.object({
   displayName: z
@@ -38,8 +70,11 @@ const contactInputSchema: _ContactInput = z.object({
 });
 
 /**
- * Internal type definition for complete contact object.
- * Extends ContactInput with system-generated fields.
+ * Schema type definition for complete contact records.
+ *
+ * @internal
+ * Extends ContactInput with system-generated fields like
+ * IDs and timestamps.
  */
 type _Contact = z.ZodObject<{
   displayName: z.ZodString;
@@ -53,8 +88,14 @@ type _Contact = z.ZodObject<{
 }>;
 
 /**
- * Schema for validating complete contact objects.
- * Includes both user-provided and system-generated fields.
+ * Schema for complete contact records.
+ *
+ * @remarks
+ * Extends contactInputSchema with additional system fields:
+ * - id: Unique identifier
+ * - profileId: Associated profile ID
+ * - createdAt: Creation timestamp
+ * - updatedAt: Last update timestamp
  */
 const contactSchema: _Contact = z.object({
   id: z.string().min(1, "Contact id is required"),
@@ -64,10 +105,21 @@ const contactSchema: _Contact = z.object({
 }).merge(contactInputSchema);
 
 /**
- * Exposing all contact schemas
+ * Type representing a complete contact record.
+ * Includes both user-provided and system-generated fields.
+ *
+ * @see {@link contactSchema} for validation rules
+ */
+export type ContactData = z.infer<typeof ContactSchemas.contactData>;
+
+/**
+ * Collection of all contact-related schemas.
  */
 export const ContactSchemas = {
+  /** Schema for complete contact records */
   contactData: contactSchema,
+  /** Schema for contact input validation */
   contactInput: contactInputSchema,
+  /** Schema for contact channel types */
   contactType: contactTypeSchema,
 };

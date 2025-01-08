@@ -5,6 +5,12 @@ import { ContactSchemas } from "@models/index.ts";
 
 /**
  * Contact API contract
+ * Defines the REST endpoints for managing contacts
+ *
+ * @property {Object} postContact - Create a new contact (POST /)
+ * @property {Object} editContact - Update an existing contact (PATCH /:id)
+ * @property {Object} getContacts - Retrieve contacts list (GET /)
+ * @property {Object} deleteContact - Delete a contact (DELETE /:id)
  */
 export const contract = initContract().router({
   postContact: {
@@ -26,11 +32,7 @@ export const contract = initContract().router({
   getContacts: {
     method: "GET",
     path: "/",
-    query: z.object({
-      rangeStart: z.number(),
-      rangeEnd: z.number(),
-      orderByDesc: z.string(),
-    }),
+    query: z.object({ orderByDesc: z.string() }),
     responses: {
       200: z.array(ContactSchemas.contactData),
     },
@@ -46,3 +48,8 @@ export const contract = initContract().router({
 }, {
   commonResponses: commonAPIResponses,
 });
+
+/**
+ * Export type for use in client implementations
+ */
+export type ContactAPI = typeof contract;

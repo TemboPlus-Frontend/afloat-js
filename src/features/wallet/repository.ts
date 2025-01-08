@@ -79,7 +79,7 @@ export class WalletRepo extends BaseRepository<typeof contract> {
     });
   }
 
-  async genWalletDetailsPDF() {
+  async genWalletDetailsPDF(): Promise<StatementFile> {
     return await this.fileGenRepo.genAccountDetailsPDF();
   }
 }

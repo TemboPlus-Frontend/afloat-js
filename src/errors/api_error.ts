@@ -61,7 +61,12 @@ export class APIError extends Error {
     });
   }
 
-  static get schema() {
+  static get schema(): z.ZodObject<{
+    message: z.ZodString;
+    statusCode: z.ZodNumber;
+    error: z.ZodOptional<z.ZodString>;
+    details: z.ZodOptional<z.AnyZodObject>;
+  }> {
     return z.object({
       message: z.string(),
       statusCode: z.number().int(),
