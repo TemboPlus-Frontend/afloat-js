@@ -24,6 +24,7 @@
     "@temboplus/tembo-core@0.0.6": {
       "integrity": "1b3bddf0c2423773dbb49513b2e368939c09d6ea3891b97f9b11e6391110bb96",
       "dependencies": [
+        "npm:antd",
         "npm:uuid"
       ]
     }

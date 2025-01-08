@@ -1,4 +1,4 @@
-import type { PhoneNumber } from "@temboplus/tembo-core";
+import type { PhoneNumber } from "@jsr/temboplus__tembo-core";
 import type { PayoutChannelCode } from "@models/payout/types.ts";
 
 export const createPayoutChannelCode = {

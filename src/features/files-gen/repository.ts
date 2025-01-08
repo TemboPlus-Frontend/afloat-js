@@ -5,15 +5,11 @@ import type {
   ClientInferRequest,
   ClientInferResponseBody,
 } from "../../npm/ts-rest.ts";
-import { StatementFile } from "@models/wallet/index.ts";
+import type { StatementFile } from "@models/wallet/index.ts";
 
 type GenStatementInput = ClientInferRequest<
   typeof contract.genStatementPDF
 >["body"];
-
-type GenStatementResponse = ClientInferResponseBody<
-  typeof contract.genStatementPDF
->;
 
 type GenAccountDetailsResponse = ClientInferResponseBody<
   typeof contract.genAccountDetailsPDF

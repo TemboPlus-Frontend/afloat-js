@@ -13,6 +13,7 @@
         "@errors/": "./src/errors/",
         "@features/": "./src/features/",
         "@temboplus/tembo-core": "jsr:@temboplus/tembo-core@^0.0.6",
+        "@jsr/temboplus__tembo-core": "jsr:@temboplus/tembo-core@^0.0.6",
         "@ts-rest/core": "npm:@ts-rest/core@^3.51.0",
         "antd": "npm:antd@^5.22.7",
         "firebase": "npm:firebase@^11.0.2",

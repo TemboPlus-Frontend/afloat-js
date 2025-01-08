@@ -43,12 +43,58 @@ After importing the package into an npm-based dependency manager, you must manua
 3. **Repeat As Needed:**  
    Repeat this process for all incorrectly transformed `npm:` imports within your project.
 
+### Type Compatibility Between JSR and NPM Environments
+
+When using this package alongside `@temboplus/tembo-core` in an npm environment, you may encounter type compatibility issues due to different import paths between JSR and npm environments.
+
+#### The Problem
+
+In the JSR (Deno) environment, types are imported as:
+```typescript
+import type { PhoneNumber } from "@temboplus/tembo-core"
+```
+
+While in the npm environment, the same types are imported as:
+```typescript
+import type { PhoneNumber } from "@jsr/temboplus__tembo-core"
+```
+
+This difference in import paths can cause TypeScript to treat identical types as incompatible.
+
+#### Solution
+
+To ensure type compatibility, we recommend using consistent npm-style imports in both environments:
+
+1. In your npm project's `package.json`:
+```json
+{
+  "dependencies": {
+    "@temboplus/tembo-core": "npm:@jsr/temboplus__tembo-core@^version",
+    "@temboplus/afloat": "npm:@jsr/temboplus__afloat@^version"
+  }
+}
+```
+
+2. Then use the imports consistently:
+```typescript
+// This will work in both Deno and npm environments
+import type { PhoneNumber } from "@jsr/temboplus__tembo-core"
+```
+
+This approach ensures that types are resolved from the same source regardless of the environment.
+
 #### Why This Is Necessary
 
-Without correcting the import paths, npm dependency managers and tools cannot resolve the dependencies, leading to runtime or build-time errors. This workaround ensures your project can function as intended until the upstream issue is resolved.
+Without consistent import paths, TypeScript will treat types from `@temboplus/tembo-core` and `@jsr/temboplus__tembo-core` as distinct types, even though they are structurally identical. This can cause type errors when passing objects between functions from different packages.
+
+---
 
 #### Looking Ahead
 
-This problem is related to an unresolved issue in Deno: [denoland/deno#24076](https://github.com/denoland/deno/issues/24076). Once this issue is addressed, future versions of this package will no longer require such manual corrections.
+These issues are related to unresolved issues in Deno:
+- Import path transformation: [denoland/deno#24076](https://github.com/denoland/deno/issues/24076)
+- Type compatibility between JSR and npm packages: Being tracked for future improvements
+
+Once these issues are addressed, future versions of this package will no longer require such manual corrections.
 
 ---

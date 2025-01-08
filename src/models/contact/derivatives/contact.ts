@@ -1,7 +1,7 @@
 import type { ContactData, ContactType } from "@models/contact/types.ts";
 import { ContactSchemas } from "@models/contact/schemas.ts";
 import { MobileContactInfo } from "@models/contact/index.ts";
-import { Bank, PhoneNumber } from "@temboplus/tembo-core";
+import { Bank, PhoneNumber } from "@jsr/temboplus__tembo-core";
 import {
   BankContactInfo,
   type ContactInfo,
