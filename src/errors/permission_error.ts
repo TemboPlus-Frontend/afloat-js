@@ -1,4 +1,5 @@
 import type { Permission } from "@models/permission.ts";
+
 /**
  * Custom error class representing an error caused by missing required permissions.
  * Extends the built-in {@link Error} class to include the `requiredPermissions` property.
@@ -26,5 +27,33 @@ export class PermissionError extends Error {
     );
     this.name = "PermissionError";
     this.requiredPermissions = args.requiredPermissions;
+  }
+
+  /**
+   * Validates if an unknown value is a PermissionError instance.
+   *
+   * @param {unknown} error - The value to validate.
+   * @returns {error is PermissionError} - Whether the value is a valid PermissionError instance.
+   *
+   * @example
+   * try {
+   *   // Some code that might throw
+   * } catch (error) {
+   *   if (PermissionError.validate(error)) {
+   *     console.log(error.requiredPermissions);
+   *   }
+   * }
+   */
+  public static validate(error: unknown): error is PermissionError {
+    return (
+      error instanceof Error &&
+      error instanceof PermissionError &&
+      error.name === "PermissionError" &&
+      Array.isArray(error.requiredPermissions) &&
+      error.requiredPermissions.every((permission) =>
+        typeof permission === "string" ||
+        (typeof permission === "object" && permission !== null)
+      )
+    );
   }
 }

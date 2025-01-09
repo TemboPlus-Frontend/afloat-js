@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+# Cancel in-progress runs on new pushes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: 2.1.4
+    
+    - name: Cache dependencies
+      run: deno cache mod.ts
+    
+    - name: Run Deno lint
+      run: deno lint
+      
+    - name: Run Type Check
+      run: deno check mod.ts
+
+  test:
+    name: Test
+    needs: lint
+    runs-on: ubuntu-latest
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: 2.1.4
+    
+    - name: Cache dependencies
+      run: deno cache mod.ts
+    
+    - name: Run tests with coverage
+      run: deno test

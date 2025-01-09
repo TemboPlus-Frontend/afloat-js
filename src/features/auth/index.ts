@@ -1,1 +1,1 @@
-export * from "@features/auth/manager.ts"
+export * from "@features/auth/manager.ts";

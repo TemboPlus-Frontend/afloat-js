@@ -1,1 +1,1 @@
-export * from "@ts-rest/core"
+export * from "@ts-rest/core";

@@ -1,4 +1,9 @@
-import { create, type StoreApi, type UseBoundStore } from "@npm/zustand.ts";
+import {
+  create,
+  type StoreApi,
+  type UseBoundStore,
+  useStore,
+} from "@npm/zustand.ts";
 import { createJSONStorage, persist } from "@npm/zustand.ts";
 import { AuthRepository } from "@features/auth/repository.ts";
 import { User } from "@models/index.ts";
@@ -48,6 +53,14 @@ export class AfloatAuth {
    */
   get currentUser(): User | undefined {
     return store.getState().getUser();
+  }
+  /**
+   * React hook that retrieves the currently authenticated user from the global store.
+   *
+   * @returns {User | undefined} The current user object if authenticated, or `undefined` if no user is logged in.
+   */
+  useCurrentUser(): User | undefined {
+    return useStore(store).getUser();
   }
 
   /**

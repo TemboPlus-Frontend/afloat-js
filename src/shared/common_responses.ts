@@ -1,4 +1,4 @@
-import type { AppRouteResponse } from "../npm/ts-rest.ts";
+import type { AppRouteResponse } from "@npm/ts-rest.ts";
 import { z } from "@npm/zod.ts";
 
 /* Common 400 API Error Response */

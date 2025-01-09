@@ -1,5 +1,8 @@
 import { z } from "@npm/zod.ts";
-import { PAYOUT_APPROVAL_STATUS, PAYOUT_STATUS } from "./status.ts";
+import {
+  PAYOUT_APPROVAL_STATUS,
+  PAYOUT_STATUS,
+} from "@models/payout/status.ts";
 
 /**
  * Type definition for identifier schema
@@ -50,7 +53,7 @@ type BasePayoutType = z.ZodObject<{
   msisdn: z.ZodString;
   amount: z.ZodNumber;
   description: z.ZodString;
-  notes: z.ZodEffects<z.ZodOptional<z.ZodString>>;
+  notes: Optional<z.ZodString>;
 }>;
 
 /**
@@ -65,7 +68,7 @@ type PayoutInputType = z.ZodObject<{
   msisdn: z.ZodString;
   amount: z.ZodNumber;
   description: z.ZodString;
-  notes: z.ZodEffects<z.ZodOptional<z.ZodString>>;
+  notes: Optional<z.ZodString>;
   payeeName: z.ZodString;
 }>;
 
@@ -92,28 +95,66 @@ type PayoutType = z.ZodObject<{
   msisdn: z.ZodString;
   amount: z.ZodNumber;
   description: z.ZodString;
-  notes: z.ZodEffects<z.ZodOptional<z.ZodString>>;
+  notes: Optional<z.ZodString>;
   id: z.ZodString;
   profileId: z.ZodString;
   payeeName: z.ZodString;
   status: PayoutStatusType;
   statusMessage: z.ZodString;
-  partnerReference: z.ZodEffects<z.ZodOptional<z.ZodString>>;
+  partnerReference: Optional<z.ZodString>;
   createdAt: z.ZodDate;
   updatedAt: z.ZodDate;
   approvalStatus: ApprovalPayoutStatusType;
-  createdBy: z.ZodEffects<z.ZodOptional<IdentifierType>>;
-  actionedBy: z.ZodEffects<z.ZodOptional<IdentifierType>>;
+  createdBy: Optional<IdentifierType>;
+  actionedBy: Optional<IdentifierType>;
 }>;
 
 /**
- * Helper function to make a field optional with undefined
- * Transforms null values to undefined for consistency
- * @param schema - The Zod schema to make optional
- * @returns A schema that only allows string or undefined (no null)
+ * Type representing a Zod schema that transforms nullable values to undefined
+ * @template T - The original Zod schema type
+ * @property {z.ZodNullable<T>} - The nullable version of the input schema
+ * @property {T["_output"] | undefined} - The output type, allowing the original type or undefined
+ * @property {T["_input"] | null} - The input type, allowing the original type or null
  */
-const makeOptional = <T extends z.ZodType>(schema: T) =>
-  schema.optional().transform((val) => val ?? undefined);
+type MakeOptionalResult<T extends z.ZodType> = z.ZodEffects<
+  z.ZodNullable<T>,
+  T["_output"] | undefined,
+  T["_input"] | null
+>;
+
+/**
+ * Type representing a fully optional field that transforms nulls to undefined
+ * @template T - The original Zod schema type
+ * Combines MakeOptionalResult with ZodOptional to allow both:
+ * 1. The field to be optional (can be omitted from object)
+ * 2. When present, the value can be null (transformed to undefined) or the original type
+ */
+type Optional<T extends z.ZodType> = z.ZodOptional<MakeOptionalResult<T>>;
+
+/**
+ * Creates a Zod schema that transforms null values to undefined
+ * This is useful when dealing with APIs that return null but you want to use undefined in your codebase
+ *
+ * @template T - The type of Zod schema being transformed
+ * @param {T} schema - The original Zod schema to transform
+ * @returns {MakeOptionalResult<T>} A new schema that:
+ *   - Accepts the original type or null as input
+ *   - Outputs the original type or undefined
+ *   - Automatically transforms null to undefined during validation
+ *
+ * @example
+ * const userSchema = z.object({
+ *   name: makeOptional(z.string()), // accepts: string | null, outputs: string | undefined
+ * });
+ *
+ * // These are all valid:
+ * userSchema.parse({ name: "John" })    // { name: "John" }
+ * userSchema.parse({ name: null })      // { name: undefined }
+ */
+const makeOptional = <T extends z.ZodType>(
+  schema: T,
+): MakeOptionalResult<T> =>
+  schema.nullable().transform((val) => val === null ? undefined : val);
 
 /**
  * Schema for identifying users in the payout process
@@ -161,7 +202,7 @@ const basePayoutSchema: BasePayoutType = z.object({
   msisdn: z.string(),
   amount: z.number(),
   description: z.string(),
-  notes: makeOptional(z.string()),
+  notes: makeOptional(z.string()).optional(),
 });
 
 /**
@@ -199,12 +240,13 @@ const payoutSchema: PayoutType = basePayoutSchema.extend({
   payeeName: z.string(),
   status: payoutStatusSchema,
   statusMessage: z.string(),
-  partnerReference: makeOptional(z.string()),
+  partnerReference: makeOptional(z.string()).optional(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  actionedAt: makeOptional(z.coerce.date()).optional(),
   approvalStatus: approvalPayoutStatusSchema,
-  createdBy: makeOptional(identifierSchema),
-  actionedBy: makeOptional(identifierSchema),
+  createdBy: makeOptional(identifierSchema).optional(),
+  actionedBy: makeOptional(identifierSchema).optional(),
 });
 
 /**

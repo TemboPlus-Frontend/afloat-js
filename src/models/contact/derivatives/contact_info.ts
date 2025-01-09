@@ -3,7 +3,7 @@ import {
   type Bank,
   MobileNumberFormat,
   PhoneNumber,
-} from "@jsr/temboplus__tembo-core";
+} from "@temboplus/tembo-core";
 import {
   validateAccName,
   validateBankAccNo,

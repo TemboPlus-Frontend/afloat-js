@@ -1,4 +1,4 @@
-import { Amount, Bank, PhoneNumber } from "@jsr/temboplus__tembo-core";
+import { Amount, Bank, PhoneNumber } from "@temboplus/tembo-core";
 import type { PayoutApprover, PayoutData } from "@models/payout/index.ts";
 import { PayoutSchemas } from "@models/payout/schemas.ts";
 import {
@@ -7,7 +7,7 @@ import {
   MobileContactInfo,
 } from "@models/contact/index.ts";
 import { type PAYOUT_APPROVAL_STATUS, PAYOUT_STATUS } from "../status.ts";
-import { createPayoutChannelCode } from "../channel.ts";
+import { createPayoutChannelCode } from "@models/payout/channel.ts";
 
 /**
  * Payout class that wraps the Zod schema and provides additional functionality
