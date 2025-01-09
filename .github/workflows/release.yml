@@ -5,8 +5,27 @@ on:
       - main
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: 2.x
+    
+    - name: Cache dependencies
+      run: deno cache mod.ts
+    
+    - name: Run tests with coverage
+      run: deno test
+
   publish:
     name: Publish to JSR
+    needs: test
     runs-on: ubuntu-latest
 
     permissions:
@@ -21,8 +40,5 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Run tests
-        run: deno test
-
       - name: Publish to JSR
-        run: deno publish
+        run: deno publish --allow-slow-types
