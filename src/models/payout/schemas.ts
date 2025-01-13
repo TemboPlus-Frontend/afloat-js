@@ -200,7 +200,7 @@ const approvalPayoutStatusSchema: ApprovalPayoutStatusType = z.enum([
 const basePayoutSchema: BasePayoutType = z.object({
   channel: z.string(),
   msisdn: z.string(),
-  amount: z.number(),
+  amount: z.coerce.number(),
   description: z.string(),
   notes: makeOptional(z.string()).optional(),
 });

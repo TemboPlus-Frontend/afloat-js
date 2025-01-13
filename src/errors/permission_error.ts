@@ -1,4 +1,5 @@
-import type { Permission } from "@models/permission.ts";
+import { type Permission, Permissions } from "@models/permission.ts";
+import { z } from "@npm/zod.ts";
 
 /**
  * Custom error class representing an error caused by missing required permissions.
@@ -30,30 +31,45 @@ export class PermissionError extends Error {
   }
 
   /**
-   * Validates if an unknown value is a PermissionError instance.
+   * Validates if an unknown value is a valid PermissionError instance.
+   * Performs structural validation of the error object and its properties.
    *
    * @param {unknown} error - The value to validate.
-   * @returns {error is PermissionError} - Whether the value is a valid PermissionError instance.
+   * @returns {error is PermissionError} Type predicate indicating if the value is a valid PermissionError.
    *
    * @example
    * try {
-   *   // Some code that might throw
+   *   throw new Error('Access denied');
    * } catch (error) {
-   *   if (PermissionError.validate(error)) {
+   *   if (PermissionError.is(error)) {
+   *     // error is typed as PermissionError with properly typed requiredPermissions
    *     console.log(error.requiredPermissions);
    *   }
    * }
+   *
+   * @remarks
+   * Validates the following:
+   * - Has all required Error properties
+   * - Has correct error name
+   * - Contains properly structured requiredPermissions array
+   * - Maintains proper prototype chain
    */
-  public static validate(error: unknown): error is PermissionError {
-    return (
-      error instanceof Error &&
-      error instanceof PermissionError &&
-      error.name === "PermissionError" &&
-      Array.isArray(error.requiredPermissions) &&
-      error.requiredPermissions.every((permission) =>
-        typeof permission === "string" ||
-        (typeof permission === "object" && permission !== null)
-      )
-    );
+  public static is(error: unknown): error is PermissionError {
+    const permissionSchema = z.union([
+      z.enum(Object.values(Permissions.Profile) as [string, ...string[]]),
+      z.enum(Object.values(Permissions.Contact) as [string, ...string[]]),
+      z.enum(Object.values(Permissions.Payment) as [string, ...string[]]),
+      z.enum(Object.values(Permissions.Payout) as [string, ...string[]]),
+      z.enum(Object.values(Permissions.Transfer) as [string, ...string[]]),
+      z.enum(Object.values(Permissions.Wallet) as [string, ...string[]]),
+    ]);
+
+    const errorSchema = z.object({
+      name: z.literal("PermissionError"),
+      message: z.string(),
+      requiredPermissions: z.array(permissionSchema),
+    });
+
+    return errorSchema.safeParse(error).success;
   }
 }

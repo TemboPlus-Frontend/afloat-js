@@ -46,22 +46,36 @@ export class APIError extends Error {
   }
 
   /**
-   * Checks if a given object is an instance of `APIError`.
-   * @param {unknown} error - The object to check.
-   * @returns {boolean} `true` if the object is an `APIError`, otherwise `false`.
+   * Validates whether an unknown value conforms to the APIError schema.
+   * This is more thorough than an instanceof check as it verifies all required properties
+   * and their types using the defined schema.
+   *
+   * @param {unknown} error - Any value to be validated
+   * @returns {error is APIError} Type predicate indicating if the value is a valid APIError
+   *
+   * @example
+   * try {
+   *   throw new Error('Network failed');
+   * } catch (err) {
+   *   if (APIError.is(err)) {
+   *     // err is typed as APIError here
+   *     console.log(err.statusCode);
+   *   }
+   * }
    */
-  static isApiError(error: unknown): error is APIError {
-    return error instanceof APIError;
+  public static is(error: unknown): error is APIError {
+    const result = APIError.schema.safeParse(error);
+    return result.success;
   }
 
-  static unknown(message?: string): APIError {
+  public static unknown(message?: string): APIError {
     return new APIError({
       message: message ?? "An unknown error occurred",
       statusCode: 502,
     });
   }
 
-  static get schema(): z.ZodObject<{
+  public static get schema(): z.ZodObject<{
     message: z.ZodString;
     statusCode: z.ZodNumber;
     error: z.ZodOptional<z.ZodString>;

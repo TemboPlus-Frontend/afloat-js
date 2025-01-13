@@ -3,4 +3,3 @@ export * from "@models/payout/schemas.ts";
 export * from "@models/payout/channel.ts";
 export * from "@models/payout/api.ts";
 export * from "@models/payout/derivatives/payout.ts";
-export * from "@models/payout/derivatives/payout_validator.ts";

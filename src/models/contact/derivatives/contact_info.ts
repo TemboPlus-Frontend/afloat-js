@@ -1,9 +1,5 @@
 import type { ContactType } from "@models/contact/index.ts";
-import {
-  type Bank,
-  MobileNumberFormat,
-  PhoneNumber,
-} from "@temboplus/tembo-core";
+import { Bank, MobileNumberFormat, PhoneNumber } from "@temboplus/tembo-core";
 import {
   validateAccName,
   validateBankAccNo,
@@ -109,8 +105,59 @@ export class MobileContactInfo extends BaseContactInfo {
    */
   validate(): boolean {
     return this.phoneNumber !== undefined &&
-      PhoneNumber.validate(this.phoneNumber.compactNumber) &&
+      PhoneNumber.canConstruct(this.phoneNumber.compactNumber) &&
       this.name.length > 0;
+  }
+
+  /**
+   * Validates if an unknown value is a valid MobileContactInfo object.
+   * Checks both the structural integrity and data validity of name and phone number properties.
+   *
+   * @param {unknown} obj - The value to validate
+   * @returns {obj is MobileContactInfo} Type predicate indicating if the value is a valid MobileContactInfo
+   *
+   * @example
+   * const maybeContact = JSON.parse(someData);
+   * if (MobileContactInfo.is(maybeContact)) {
+   *   // maybeContact is typed as MobileContactInfo
+   *   console.log(maybeContact.name);
+   *   console.log(maybeContact.phoneNumber.label);
+   * }
+   *
+   * @remarks
+   * - Name must be a non-empty string
+   * - Phone number can be either:
+   *   - A string that can be parsed into a valid PhoneNumber
+   *   - A PhoneNumber object with valid properties
+   * - Returns false if either property is invalid or missing
+   */
+  public static is(obj: unknown): obj is MobileContactInfo {
+    if (!obj || typeof obj !== "object") return false;
+
+    const mobileContactInfo = obj as Record<string, unknown>;
+
+    // checks if name exists and is a string
+    if (typeof mobileContactInfo.name !== "string") return false;
+    const name = mobileContactInfo.name;
+
+    // checks if phoneNumber exists and is valid
+    let phone_number: PhoneNumber | undefined = undefined;
+
+    if (typeof mobileContactInfo.phoneNumber === "string") {
+      phone_number = PhoneNumber.from(mobileContactInfo.phoneNumber);
+    }
+
+    if (typeof mobileContactInfo.phoneNumber === "object") {
+      const obj = mobileContactInfo.phoneNumber;
+      const isValidPhone = PhoneNumber.is(obj);
+      if (isValidPhone) {
+        phone_number = obj;
+      }
+    }
+
+    const validName = name.trim().length > 0;
+    const validPhone = phone_number !== undefined;
+    return validName && validPhone;
   }
 
   override get displayName(): string {
@@ -179,6 +226,59 @@ export class BankContactInfo extends BaseContactInfo {
     return this.bank.validate() &&
       validateAccName(this.accName) &&
       validateBankAccNo(this.accNumber);
+  }
+
+  /**
+   * Validates if an unknown value is a valid BankContactInfo object.
+   * Checks both the structural integrity and data validity of account name, account number, and bank details.
+   *
+   * @param {unknown} obj - The value to validate
+   * @returns {obj is BankContactInfo} Type predicate indicating if the value is a valid BankContactInfo
+   *
+   * @example
+   * const maybeBank = JSON.parse(someData);
+   * if (BankContactInfo.is(maybeBank)) {
+   *   // maybeBank is typed as BankContactInfo
+   *   console.log(maybeBank.accName);
+   *   console.log(maybeBank.accNumber);
+   *   console.log(maybeBank.bank.name);
+   * }
+   *
+   * @remarks
+   * - Account name must be a valid string (validated by {@link validateAccName})
+   * - Account number must be a valid string (validated by {@link validateBankAccNo})
+   * - Bank must be a valid Bank object (validated by {@link Bank.is})
+   * - Returns false if any property is invalid or missing
+   * - All properties are required and must pass their respective validations
+   */
+  public static is(obj: unknown): obj is BankContactInfo {
+    if (!obj || typeof obj !== "object") return false;
+
+    const bankContactInfo = obj as Record<string, unknown>;
+
+    // checks if acc. name exists and is a string
+    if (typeof bankContactInfo.accName !== "string") return false;
+    const accName = bankContactInfo.accName;
+
+    // checks if acc. no. exists and is a string
+    if (typeof bankContactInfo.accNumber !== "string") return false;
+    const accNumber = bankContactInfo.accNumber;
+
+    // checks if phoneNumber exists and is valid
+    let bank: Bank | undefined = undefined;
+
+    if (typeof bankContactInfo.bank === "object") {
+      const obj = bankContactInfo.bank;
+      const isValidBank = Bank.is(obj);
+      if (isValidBank) {
+        bank = obj;
+      }
+    }
+
+    const validAccName = validateAccName(accName);
+    const validAccNumber = validateBankAccNo(accNumber);
+    const validBank = bank !== undefined;
+    return validAccName && validAccNumber && validBank;
   }
 
   override get displayName(): string {

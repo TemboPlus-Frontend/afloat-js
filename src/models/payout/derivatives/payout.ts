@@ -202,7 +202,7 @@ export class Payout {
    * Creates a Payout instance from raw data without throwing
    * @returns {Payout | null} Payout instance or null if validation fails
    */
-  static createSafe(data: PayoutData): Payout | null {
+  public static createSafe(data: PayoutData): Payout | null {
     try {
       return new Payout(data);
     } catch {
@@ -211,9 +211,79 @@ export class Payout {
   }
 
   /**
+   * Checks if an unknown value contains valid data to construct a Payout instance.
+   * This is useful when validating raw data structures before instantiation.
+   *
+   * @param {unknown} obj - The value containing potential payout data
+   * @returns {obj is Payout} Type predicate indicating if a Payout can be constructed
+   *
+   * @example
+   * ```typescript
+   * const rawData = await fetchPayoutData();
+   * if (Payout.canConstruct(rawData)) {
+   *   const payout = Payout.create(rawData);
+   *   // TypeScript knows payout is valid here
+   *   console.log(payout.amount.toString());
+   * }
+   * ```
+   *
+   * @throws {never} This method never throws errors
+   *
+   * @remarks
+   * This method performs strict validation against the {@link PayoutData} schema
+   */
+  public static canConstruct(obj: unknown): obj is Payout {
+    if (!obj || typeof obj !== "object") return false;
+
+    const result = PayoutSchemas.payoutData.safeParse(obj);
+    if (!result.success) return false;
+
+    const payout = Payout.createSafe(result.data);
+    return payout !== null;
+  }
+
+  /**
+   * Validates if an unknown value is a Payout instance.
+   * This is a runtime type guard that ensures proper object structure and data validity.
+   *
+   * @param {unknown} obj - The value to validate
+   * @returns {obj is Payout} Type predicate indicating if the value is a valid Payout
+   *
+   * @example
+   * ```typescript
+   * const maybePayout = getPayoutFromCache();
+   * if (Payout.is(maybePayout)) {
+   *   // TypeScript knows maybePayout is a Payout here
+   *   console.log(maybePayout.status);
+   * }
+   * ```
+   *
+   * @throws {never} This method never throws errors
+   *
+   * @remarks
+   * This method performs a complete structural validation:
+   * 1. Checks if the value is an object
+   * 2. Verifies presence of internal data property
+   * 3. Validates the data against PayoutData schema
+   * 4. Ensures the object is a proper Payout instance
+   *
+   * Use this method when:
+   * - Validating cached Payout instances
+   * - Checking serialized Payout objects
+   * - Verifying API responses
+   * - Type narrowing in conditional blocks
+   */
+  public static is(obj: unknown): obj is Payout {
+    if (!obj || typeof obj !== "object") return false;
+    if (!("data" in obj)) return false;
+
+    return Payout.canConstruct(obj.data);
+  }
+
+  /**
    * Converts Payout instance to a plain object
    */
-  toJSON(): PayoutData {
+  public toJSON(): PayoutData {
     return { ...this.data };
   }
 }

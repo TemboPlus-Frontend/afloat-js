@@ -175,7 +175,7 @@ export class Contact {
    * Creates a Contact instance from raw data
    * @throws {ZodError} if validation fails
    */
-  static create(data: ContactData): Contact {
+  public static create(data: ContactData): Contact {
     return new Contact(data);
   }
 
@@ -183,7 +183,7 @@ export class Contact {
    * Creates multiple Contact instances from an array of raw data
    * @throws {ZodError} if validation fails for any item
    */
-  static createMany(dataArray: ContactData[]): Contact[] {
+  public static createMany(dataArray: ContactData[]): Contact[] {
     return dataArray.map((data) => new Contact(data));
   }
 
@@ -191,7 +191,7 @@ export class Contact {
    * Creates a Contact instance from raw data without throwing
    * @returns {Contact | null} Contact instance or null if validation fails
    */
-  static createSafe(data: ContactData): Contact | null {
+  public static createSafe(data: ContactData): Contact | null {
     try {
       return new Contact(data);
     } catch {
@@ -200,10 +200,73 @@ export class Contact {
   }
 
   /**
-   * Checks if raw data matches the Contact schema
+   * Checks if an unknown value contains valid data to construct a Contact instance.
+   * This is useful when validating raw data structures before instantiation.
+   *
+   * @param {unknown} obj - The value containing potential contact data
+   * @returns {obj is Contact} Type predicate indicating if a Contact can be constructed
+   *
+   * @example
+   * ```typescript
+   * const rawData = await fetchFromAPI();
+   * if (Contact.canConstruct(rawData)) {
+   *   const contact = Contact.create(rawData);
+   *   // TypeScript knows contact is valid here
+   *   console.log(contact.displayName);
+   * }
+   * ```
+   *
+   * @throws {never} This method never throws errors
+   *
+   * @remarks
+   * This method performs strict validation against the {@link ContactData} schema.
    */
-  static isValid(data: unknown): data is ContactData {
-    return ContactSchemas.contactData.safeParse(data).success;
+  public static canConstruct(obj: unknown): obj is Contact {
+    if (!obj || typeof obj !== "object") return false;
+
+    const result = ContactSchemas.contactData.safeParse(obj);
+    if (!result.success) return false;
+
+    const contact = Contact.createSafe(result.data);
+    return contact !== null;
+  }
+
+  /**
+   * Validates if an unknown value is a Contact instance.
+   * This is a runtime type guard that ensures proper object structure and data validity.
+   *
+   * @param {unknown} obj - The value to validate
+   * @returns {obj is Contact} Type predicate indicating if the value is a valid Contact
+   *
+   * @example
+   * ```typescript
+   * const maybeContact = getContactFromCache();
+   * if (Contact.is(maybeContact)) {
+   *   // TypeScript knows maybeContact is a Contact here
+   *   console.log(maybeContact.displayName);
+   * }
+   * ```
+   *
+   * @throws {never} This method never throws errors
+   *
+   * @remarks
+   * This method performs a complete structural validation:
+   * 1. Checks if the value is an object
+   * 2. Verifies presence of internal data property
+   * 3. Validates the data against ContactData schema
+   * 4. Ensures the object is a proper Contact instance
+   *
+   * Use this method when:
+   * - Validating cached Contact instances
+   * - Checking serialized Contact objects
+   * - Verifying API responses
+   * - Type narrowing in conditional blocks
+   */
+  public static is(obj: unknown): obj is Contact {
+    if (!obj || typeof obj !== "object") return false;
+    if (!("data" in obj)) return false;
+
+    return Contact.canConstruct(obj.data);
   }
 
   /**

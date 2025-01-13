@@ -5,16 +5,20 @@ import type { RuleObject } from "@npm/antd.ts";
  *
  * Key Criteria:
  * 1. The name must consist of at least two words separated by one or more spaces.
- * 2. Each word can include only alphabetic characters (`a-z`, `A-Z`) and optional hyphens (`-`).
+ * 2. Each word can include alphabetic characters (a-z, A-Z) and special characters like
+ *    hyphens (-), apostrophes ('), periods (.), and other Unicode letters.
  * 3. Both words must have at least two characters.
  * 4. Allow additional whitespace between words but disallow trailing or leading spaces.
- * 5. Supports names with hyphens (e.g., "Anna-Marie Johnson" or "Jean-Luc Picard").
+ * 5. Supports names with special characters (e.g., "O'Connor", "St. John", "María-José")
  *
  * Examples of valid names:
  * - "John Doe"
  * - "Anna-Marie Johnson"
  * - "Jean-Luc Picard"
- * - "Mary Ann"
+ * - "Mary O'Connor"
+ * - "St. John Smith"
+ * - "María José"
+ * - "François d'Arc"
  *
  * Examples of invalid names:
  * - "John" (only one name)
@@ -23,7 +27,7 @@ import type { RuleObject } from "@npm/antd.ts";
  * - " John Doe " (leading or trailing spaces)
  */
 const ACCOUNT_NAME_REGEX =
-  /^[A-Za-z]{2,}(-[A-Za-z]{2,})?( [A-Za-z]{2,}(-[A-Za-z]{2,})?)+$/;
+  /^[\p{L}]['\p{L}.-]{1,}(?: [\p{L}]['\p{L}.-]{1,})+$/u;
 
 /**
  * Regex pattern to validate account numbers.
