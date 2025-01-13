@@ -3,7 +3,6 @@
   "specifiers": {
     "jsr:@std/assert@*": "1.0.8",
     "jsr:@std/internal@^1.0.5": "1.0.5",
-    "jsr:@temboplus/tembo-core@^0.0.6": "0.0.6",
     "jsr:@temboplus/tembo-core@^0.0.8": "0.0.8",
     "npm:@ts-rest/core@^3.51.0": "3.51.0_zod@3.24.1",
     "npm:@types/node@*": "22.5.4",
@@ -22,13 +21,6 @@
     },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
-    },
-    "@temboplus/tembo-core@0.0.6": {
-      "integrity": "1b3bddf0c2423773dbb49513b2e368939c09d6ea3891b97f9b11e6391110bb96",
-      "dependencies": [
-        "npm:antd",
-        "npm:uuid"
-      ]
     },
     "@temboplus/tembo-core@0.0.8": {
       "integrity": "622ba0075c56c10f33b53a9c0b7f0e5222321e5534c017cf13dec40255c0b4fb",
@@ -2575,7 +2567,6 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@temboplus/tembo-core@^0.0.6",
       "jsr:@temboplus/tembo-core@^0.0.8",
       "npm:@ts-rest/core@^3.51.0",
       "npm:antd@^5.22.7",
