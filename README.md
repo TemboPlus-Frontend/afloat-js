@@ -1,100 +1,66 @@
 # @temboplus/afloat
 
----
+## NPM Integration Guide
 
-### Handling Incorrect `npm:` Imports in NPM Dependency Managers
+This guide explains how to effectively use `@temboplus/afloat` in NPM projects and handle potential compatibility challenges.
 
-> **Directory**: `src/npm`
+### Package Dependencies and NPM Usage
 
-When this package is imported into an npm-based dependency manager, such as a project using Node.js or an npm build tool, Deno's npm integration may cause dependency specifiers to be transformed incorrectly. Specifically, imports such as:  
+This package is designed to work seamlessly with `@temboplus/tembo-core`. To avoid dependency conflicts and type compatibility issues, we recommend:
 
-```typescript
-import { initContract } from "npm:@ts-rest/core^3.51.0";
-```
+1. Only installing `@temboplus/afloat` in your NPM project
+2. Not manually installing `@temboplus/tembo-core`, as its functionality is re-exported through `@temboplus/afloat`
 
-are generated instead of the expected standard npm format:  
-
-```typescript
-import { initContract } from "@ts-rest/core";
-```
-
-#### The Problem
-
-This issue occurs because when a Deno package containing npm dependencies is published to JSR, Deno's `npm:` specifier is retained. However, npm-based tools do not recognize the `npm:` prefix or the specific Deno-version syntax (e.g., `^3.51.0` within the specifier).
-
-This results in a breaking import path that requires manual intervention to function correctly.
-
-#### Manual Correction
-
-After importing the package into an npm-based dependency manager, you must manually edit all transformed imports. Specifically:
-
-1. **Locate Invalid Imports:**  
-   Search for any import paths beginning with the `npm:` prefix, such as:  
-   ```typescript
-   import { initContract } from "npm:@ts-rest/core^3.51.0";
-   ```
-
-2. **Replace with Correct Specifier:**  
-   Change the import to the standard npm-compatible format:
-   ```typescript
-   import { initContract } from "@ts-rest/core";
-   ```
-
-3. **Repeat As Needed:**  
-   Repeat this process for all incorrectly transformed `npm:` imports within your project.
-
-### Type Compatibility Between JSR and NPM Environments
-
-When using this package alongside `@temboplus/tembo-core` in an npm environment, you may encounter type compatibility issues due to different import paths between JSR and npm environments.
-
-#### The Problem
-
-In the JSR (Deno) environment, types are imported as:
-```typescript
-import type { PhoneNumber } from "@temboplus/tembo-core"
-```
-
-While in the npm environment, the same types are imported as:
-```typescript
-import type { PhoneNumber } from "@jsr/temboplus__tembo-core"
-```
-
-This difference in import paths can cause TypeScript to treat identical types as incompatible.
-
-#### Solution
-
-To ensure type compatibility, we recommend using consistent npm-style imports in both environments:
-
-1. In your npm project's `package.json`:
 ```json
 {
   "dependencies": {
-    "@temboplus/tembo-core": "npm:@jsr/temboplus__tembo-core@^version",
-    "@temboplus/afloat": "npm:@jsr/temboplus__afloat@^version"
+    "@temboplus/afloat": "^1.0.0"
+    // Don't install @temboplus/tembo-core directly
   }
 }
 ```
 
-2. Then use the imports consistently:
+### Import Guidelines
+
+#### ✅ Correct Usage
 ```typescript
-// This will work in both Deno and npm environments
-import type { PhoneNumber } from "@jsr/temboplus__tembo-core"
+// Import everything from @temboplus/afloat
+import { PhoneNumber, /* other types and functions */ } from "@temboplus/afloat";
 ```
 
-This approach ensures that types are resolved from the same source regardless of the environment.
+#### ❌ Avoid
+```typescript
+// Don't import from @temboplus/tembo-core directly
+import { PhoneNumber } from "@temboplus/tembo-core";
+// Don't use JSR-style imports
+import { PhoneNumber } from "@jsr/temboplus__tembo-core";
+```
 
-#### Why This Is Necessary
+### Technical Details
 
-Without consistent import paths, TypeScript will treat types from `@temboplus/tembo-core` and `@jsr/temboplus__tembo-core` as distinct types, even though they are structurally identical. This can cause type errors when passing objects between functions from different packages.
+#### Dependency Management
+- `@temboplus/afloat` bundles and re-exports all necessary functionality from `@temboplus/tembo-core`
+- This approach prevents version mismatches and type compatibility issues
+- No need to manage multiple package versions or worry about import path differences
 
----
+#### Type Consistency
+By consolidating all exports through `@temboplus/afloat`, we ensure:
+- Consistent type references across your codebase
+- No TypeScript compatibility issues between JSR and NPM environments
+- Simplified import statements
 
-#### Looking Ahead
+### Known Issues and Solutions
 
-These issues are related to unresolved issues in Deno:
+#### NPM Import Paths
+If you encounter any import path issues:
+1. Always use standard NPM import syntax
+2. Import all types and functions from `@temboplus/afloat`
+3. Don't use `npm:` prefixes in your imports
+
+#### Related Issues
 - Import path transformation: [denoland/deno#24076](https://github.com/denoland/deno/issues/24076)
-- Type compatibility between JSR and npm packages: Being tracked for future improvements
-
-Once these issues are addressed, future versions of this package will no longer require such manual corrections.
+- JSR and NPM compatibility improvements are ongoing
 
 ---
+
+This documentation will be updated as new solutions become available.
