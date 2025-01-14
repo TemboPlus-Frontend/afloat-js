@@ -1,4 +1,4 @@
-import type { PhoneNumber } from "@jsr/temboplus__tembo-core";
+import type { PhoneNumber } from "@models/index.ts";
 
 /**
  * Represents the available channels through which payouts can be processed.
