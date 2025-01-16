@@ -1,5 +1,5 @@
 import type { ContactType } from "@models/contact/index.ts";
-import { Bank, MobileNumberFormat, PhoneNumber } from "@temboplus/tembo-core";
+import { Bank, MobileNumberFormat, PhoneNumber } from "@temboplus/frontend-core";
 import {
   validateAccName,
   validateBankAccNo,

@@ -3,7 +3,7 @@ import {
   BankContactInfo,
   MobileContactInfo,
 } from "@models/contact/derivatives/contact_info.ts";
-import { Bank, PhoneNumber } from "@temboplus/tembo-core";
+import { Bank, PhoneNumber } from "@temboplus/frontend-core";
 
 Deno.test("MobileContactInfo.is", async (t) => {
   // Valid inputs with string phone number

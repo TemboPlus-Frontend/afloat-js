@@ -1,4 +1,4 @@
-import { Amount, Bank, PhoneNumber } from "@temboplus/tembo-core";
+import { Amount, Bank, PhoneNumber } from "@temboplus/frontend-core";
 import type { PayoutApprover, PayoutData } from "@models/payout/index.ts";
 import { PayoutSchemas } from "@models/payout/schemas.ts";
 import {
