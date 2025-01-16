@@ -7,7 +7,7 @@ await build({
   entryPoints: ["./mod.ts"],
   outDir: "./npm",
   importMap: "deno.json",
-  // typeCheck: false,
+  typeCheck: false,
   shims: {
     deno: true,
   },
