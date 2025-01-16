@@ -1,4 +1,4 @@
-import { z } from "@npm/zod.ts";
+import { z } from "zod";
 
 /**
  * Helper function to make a field optional with undefined

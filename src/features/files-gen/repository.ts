@@ -4,7 +4,7 @@ import { APIError } from "@errors/api_error.ts";
 import type {
   ClientInferRequest,
   ClientInferResponseBody,
-} from "../../npm/ts-rest.ts";
+} from "@ts-rest/core";
 import type { StatementFile } from "@models/wallet/index.ts";
 
 /**

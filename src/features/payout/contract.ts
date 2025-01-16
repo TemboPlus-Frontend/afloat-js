@@ -1,7 +1,7 @@
 import { PayoutSchemas } from "@models/payout/index.ts";
 import { APIError } from "@errors/api_error.ts";
-import { initContract } from "@npm/ts-rest.ts";
-import { z } from "@npm/zod.ts";
+import { initContract } from "@ts-rest/core";
+import { z } from "zod";
 
 /** Default eager loading settings for payout API */
 export const DEFAULT_PAYOUT_API_EAGER = "[createdBy,actionedBy]";

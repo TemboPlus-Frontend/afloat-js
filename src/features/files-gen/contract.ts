@@ -1,5 +1,5 @@
-import { z } from "@npm/zod.ts";
-import { initContract } from "@npm/ts-rest.ts";
+import { z } from "zod";
+import { initContract } from "@ts-rest/core";
 import { STATEMENT_OUTPUT_TYPE } from "@models/wallet/index.ts";
 
 export const contract = initContract().router({

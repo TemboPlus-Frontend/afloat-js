@@ -1,4 +1,4 @@
-import type { RuleObject } from "@npm/antd.ts";
+import type { RuleObject } from "antd/es/form";
 
 /**
  * Regular expression to validate account names.

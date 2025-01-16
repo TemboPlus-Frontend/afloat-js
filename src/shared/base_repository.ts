@@ -1,7 +1,7 @@
-import { type AppRouter, initClient } from "@npm/ts-rest.ts";
+import { type AppRouter, initClient } from "@ts-rest/core";
 import { APIError } from "@errors/api_error.ts";
-import { v4 as uuidv4 } from "@npm/uuid.ts";
-import type { InitClientArgs } from "@npm/ts-rest.ts";
+import { v4 as uuidv4 } from "uuid";
+import type { InitClientArgs } from "@ts-rest/core";
 import type { Common400APIResponse } from "@shared/index.ts";
 import { AfloatAuth } from "@features/auth/index.ts";
 

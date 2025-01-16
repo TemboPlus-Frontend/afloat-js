@@ -1,4 +1,4 @@
-import { z } from "@npm/zod.ts";
+import { z } from "zod";
 
 /**
  * Custom error class representing API-related errors.

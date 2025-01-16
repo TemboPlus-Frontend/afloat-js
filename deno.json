@@ -1,12 +1,13 @@
 {
     "name": "@temboplus/afloat",
-    "version": "0.1.28",
+    "version": "0.1.0",
     "license": "MIT",
     "exports": "./mod.ts",
     "tasks": {
         "dev": "deno run --watch --allow-env main.ts"
     },
     "imports": {
+        "@deno/dnt": "jsr:@deno/dnt@^0.41.3",
         "@models/": "./src/models/",
         "@npm/": "./src/npm/",
         "@shared/": "./src/shared/",

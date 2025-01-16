@@ -1,4 +1,4 @@
-import { z } from "@npm/zod.ts";
+import { z } from "zod";
 
 /**
  * Schema for contact channel types.

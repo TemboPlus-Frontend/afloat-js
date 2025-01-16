@@ -3,8 +3,8 @@ import {
   type StoreApi,
   type UseBoundStore,
   useStore,
-} from "@npm/zustand.ts";
-import { createJSONStorage, persist } from "@npm/zustand.ts";
+} from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { AuthRepository } from "@features/auth/repository.ts";
 import { User } from "@models/index.ts";
 import type { Permission } from "@models/permission.ts";

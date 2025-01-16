@@ -1,5 +1,5 @@
 import { type Permission, Permissions } from "@models/permission.ts";
-import { z } from "@npm/zod.ts";
+import { z } from "zod";
 
 /**
  * Custom error class representing an error caused by missing required permissions.

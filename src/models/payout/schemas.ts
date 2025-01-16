@@ -1,4 +1,4 @@
-import { z } from "@npm/zod.ts";
+import { z } from "zod";
 import {
   PAYOUT_APPROVAL_STATUS,
   PAYOUT_STATUS,
