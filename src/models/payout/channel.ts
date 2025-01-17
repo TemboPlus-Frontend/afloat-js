@@ -62,5 +62,5 @@ export const createPayoutChannelCode = {
    * @see {@link PhoneNumber} from "@jsr/temboplus__tembo-core" for phone number structure
    */
   mobile: (phoneNumber: PhoneNumber): PayoutChannelCode =>
-    `TZ-${phoneNumber.telecom.label.toUpperCase()}-B2C` as PayoutChannelCode,
+    `TZ-${phoneNumber.networkOperator.id.toString().toUpperCase()}-B2C` as PayoutChannelCode,
 };

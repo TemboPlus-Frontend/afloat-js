@@ -6,7 +6,7 @@ import {
   type ContactInfo,
   MobileContactInfo,
 } from "@models/contact/index.ts";
-import { type PAYOUT_APPROVAL_STATUS, PAYOUT_STATUS } from "../status.ts";
+import { type PAYOUT_APPROVAL_STATUS, PAYOUT_STATUS } from "@models/payout/status.ts";
 import { createPayoutChannelCode } from "@models/payout/channel.ts";
 
 /**

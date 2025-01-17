@@ -173,7 +173,7 @@ export class MobileContactInfo extends BaseContactInfo {
   }
 
   override get channel(): string {
-    return this.phoneNumber.telecom.company;
+    return this.phoneNumber.networkOperator.mobileMoneyService;
   }
 
   override get displayNameLabel(): string {
