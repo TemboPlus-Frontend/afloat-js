@@ -18,7 +18,9 @@ jobs:
           deno-version: 2.x
       
       - name: Run tests
-        run: deno test -A
+        run: |
+            rm -f deno.lock
+            deno test -A
 
   publish:
     needs: test
