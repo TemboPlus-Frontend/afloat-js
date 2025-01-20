@@ -59,6 +59,13 @@ export class Contact {
   }
 
   /**
+   * Update timestamp of the contact
+   */
+  get updatedAt(): Date {
+    return this.data.updatedAt;
+  }
+
+  /**
    * Detailed contact information based on contact type
    *
    * @returns {ContactInfo | undefined} Contact information object:
