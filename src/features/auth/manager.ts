@@ -125,11 +125,6 @@ export class AfloatAuth {
    * @returns {User | undefined} The current user or undefined if not authenticated
    */
   useCurrentUser(): User | undefined {
-    if (typeof window === "undefined") {
-      throw new Error(
-        "useCurrentUser can only be called in browser environment",
-      );
-    }
     return useClientUser();
   }
 
