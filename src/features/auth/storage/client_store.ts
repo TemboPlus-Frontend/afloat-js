@@ -1,7 +1,6 @@
 import { User } from "@models/user/index.ts";
 import { create, type StoreApi, type UseBoundStore } from "zustand";
-import { persist } from "zustand/middleware";
-import { createJSONStorage } from "zustand/middleware/storage";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { AuthStore } from "@features/auth/storage/types.ts";
 
 /** Key used for storing auth data in session storage */
