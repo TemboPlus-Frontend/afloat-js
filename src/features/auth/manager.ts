@@ -39,12 +39,10 @@ export class AfloatAuth {
    * @returns {AfloatAuth} The singleton instance configured for client-side
    */
   public static initializeClient(): AfloatAuth {
-    if (!_instance) {
-      _instance = new AfloatAuth(
-        createClientStore(),
-        ClientTokenHandler.instance,
-      );
-    }
+    _instance = new AfloatAuth(
+      createClientStore(),
+      ClientTokenHandler.instance,
+    );
     return _instance;
   }
 
@@ -86,7 +84,7 @@ export class AfloatAuth {
    * @returns {AfloatAuth} The singleton instance
    */
   public static get instance(): AfloatAuth {
-    if (!_instance) {
+    if (_instance === null) {
       throw new Error(
         "AfloatAuth not initialized. Call initializeClient() or initializeServer() first",
       );
