@@ -10,14 +10,13 @@ import { ClientTokenHandler } from "@features/auth/storage/client_token_handler.
 import { ServerStore } from "@features/auth/storage/server_store.ts";
 import { ServerTokenHandler } from "@features/auth/storage/server_token_handler.ts";
 
+let _instance: AfloatAuth | null = null;
+
 /**
  * Main authentication class that works in both client and server environments.
  * Provides authentication functionality and user management.
  */
 export class AfloatAuth {
-  /** Singleton instance */
-  private static _instance: AfloatAuth;
-
   /** The auth store implementation */
   private store: AuthStore;
 
@@ -40,13 +39,13 @@ export class AfloatAuth {
    * @returns {AfloatAuth} The singleton instance configured for client-side
    */
   public static initializeClient(): AfloatAuth {
-    if (!this._instance) {
-      this._instance = new AfloatAuth(
+    if (!_instance) {
+      _instance = new AfloatAuth(
         createClientStore(),
         ClientTokenHandler.instance,
       );
     }
-    return this._instance;
+    return _instance;
   }
 
   /**
@@ -70,7 +69,8 @@ export class AfloatAuth {
       store.setUser(user);
 
       // Create and initialize auth instance
-      return new AfloatAuth(store, tokenHandler);
+      _instance = new AfloatAuth(store, tokenHandler);
+      return _instance;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to initialize server auth: ${error.message}`);
@@ -86,12 +86,12 @@ export class AfloatAuth {
    * @returns {AfloatAuth} The singleton instance
    */
   public static get instance(): AfloatAuth {
-    if (!this._instance) {
+    if (!_instance) {
       throw new Error(
         "AfloatAuth not initialized. Call initializeClient() or initializeServer() first",
       );
     }
-    return this._instance;
+    return _instance;
   }
 
   /**
