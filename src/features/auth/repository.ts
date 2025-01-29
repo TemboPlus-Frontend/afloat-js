@@ -1,12 +1,8 @@
-import type { ClientInferResponseBody } from "@ts-rest/core";
 import { User } from "@models/index.ts";
 import { BaseRepository } from "@shared/base_repository.ts";
-import { authContract, identityContract } from "@features/auth/contract.ts";
+import { authContract } from "@features/auth/contract.ts";
 import { APIError } from "@errors/api_error.ts";
-
-type GetUserIdentityResponse = ClientInferResponseBody<
-  typeof identityContract.getUserCredentials
->;
+import { LoginRepository } from "@features/auth/identity/repository.ts";
 
 /**
  * Class representing the AuthRepository.
@@ -78,32 +74,13 @@ export class AuthRepository extends BaseRepository<typeof authContract> {
       statusCode: 502,
     });
   }
-}
 
-/**
- * Class representing the LoginRepository.
- * Provides methods to retrieve user identity-related information.
- */
-class LoginRepository extends BaseRepository<typeof identityContract> {
-  /**
-   * Initializes an instance of LoginRepository.
-   */
-  constructor() {
-    super("login", identityContract);
-  }
-
-  /**
-   * Retrieves the user's login credentials.
-   * @returns A promise that resolves to the user's login credentials on success.
-   * @throws {APIError} If an error occurs while retrieving the credentials.
-   */
-  async getIdentity(token: string): Promise<GetUserIdentityResponse> {
-    const headers = { token };
-    const result = await this.client.getUserCredentials({ headers });
+  async getAccessList(token: string): Promise<string[]> {
+    const result = await this.client.access({ headers: { token: token } });
     if (result.status === 200) return result.body;
 
     throw new APIError({
-      message: "An error occurred while trying to get login credentials",
+      message: "An error occurred while trying to get access list",
       statusCode: 502,
     });
   }

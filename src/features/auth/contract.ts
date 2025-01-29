@@ -24,6 +24,14 @@ export const authContract = initContract().router({
       400: z.object({}),
     },
   },
+  access: {
+    method: "GET",
+    path: "/access",
+    headers: z.object({ token: z.string() }),
+    responses: {
+      200: z.string().array(),
+    },
+  },
   resetPassword: {
     method: "PUT",
     path: "/password",
@@ -32,21 +40,5 @@ export const authContract = initContract().router({
       newPassword: z.string(),
     }),
     responses: {},
-  },
-});
-
-export const identityContract = initContract().router({
-  getUserCredentials: {
-    method: "GET",
-    path: "/me",
-    headers: z.object({
-      token: z.string(),
-    }),
-    responses: {
-      200: z.object({
-        name: z.string(),
-        identity: z.string(),
-      }),
-    },
   },
 });

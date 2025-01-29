@@ -1,97 +1,168 @@
-import {
-  create,
-  type StoreApi,
-  type UseBoundStore,
-  useStore,
-} from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
 import { AuthRepository } from "@features/auth/repository.ts";
-import { User } from "@models/index.ts";
+import type { User } from "@models/index.ts";
 import type { Permission } from "@models/permission.ts";
-
-const AUTH_STORE_SESSION_STORAGE_KEY = "auth-store";
+import type { AuthStore, TokenHandler } from "@features/auth/storage/types.ts";
+import {
+  createClientStore,
+  useClientUser,
+} from "@features/auth/storage/client_store.ts";
+import { ClientTokenHandler } from "@features/auth/storage/client_token_handler.ts";
+import { ServerStore } from "@features/auth/storage/server_store.ts";
+import { ServerTokenHandler } from "@features/auth/storage/server_token_handler.ts";
 
 /**
- * Singleton class responsible for user authentication and session management.
+ * Main authentication class that works in both client and server environments.
+ * Provides authentication functionality and user management.
  */
 export class AfloatAuth {
+  /** Singleton instance */
   private static _instance: AfloatAuth;
+
+  /** The auth store implementation */
+  private store: AuthStore;
+
+  /** The token handler implementation */
+  private tokenHandler: TokenHandler;
 
   /**
    * Private constructor to prevent direct instantiation.
+   * @param {AuthStore} store - The auth store implementation to use
+   * @param {TokenHandler} tokenHandler - The token handler implementation to use
    */
-  private constructor() {}
-
-  /**
-   * Gets the singleton instance of AfloatAuth.
-   * @returns {AfloatAuth} The singleton instance.
-   */
-  public static get instance(): AfloatAuth {
-    return this._instance || (this._instance = new this());
+  private constructor(store: AuthStore, tokenHandler: TokenHandler) {
+    this.store = store;
+    this.tokenHandler = tokenHandler;
   }
 
   /**
-   * Fetches the authentication repository.
+   * Initializes AfloatAuth for client-side use.
+   * This should be called once at application startup in client environments.
+   * @returns {AfloatAuth} The singleton instance configured for client-side
+   */
+  public static initializeClient(): AfloatAuth {
+    if (!this._instance) {
+      this._instance = new AfloatAuth(
+        createClientStore(),
+        ClientTokenHandler.instance,
+      );
+    }
+    return this._instance;
+  }
+
+  /**
+   * Creates a new instance of AfloatAuth configured for server-side use.
+   * Initializes the user by fetching necessary data using the provided token.
+   * @param {string} token - Authentication token
+   * @returns {Promise<AfloatAuth>} A new instance configured for server-side
+   * @throws {Error} If token is invalid or required data cannot be fetched
+   */
+  public static async initializeServer(token: string): Promise<AfloatAuth> {
+    if (!token) {
+      throw new Error("Token is required for server initialization");
+    }
+
+    const tokenHandler = new ServerTokenHandler(token);
+    const store = new ServerStore();
+
+    try {
+      // Fetch and construct user data
+      const user = await tokenHandler.constructUser();
+      store.setUser(user);
+
+      // Create and initialize auth instance
+      return new AfloatAuth(store, tokenHandler);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to initialize server auth: ${error.message}`);
+      }
+
+      throw new Error("Failed to initialize server auth");
+    }
+  }
+
+  /**
+   * Gets the singleton instance of AfloatAuth.
+   * @throws {Error} If AfloatAuth hasn't been initialized
+   * @returns {AfloatAuth} The singleton instance
+   */
+  public static get instance(): AfloatAuth {
+    if (!this._instance) {
+      throw new Error(
+        "AfloatAuth not initialized. Call initializeClient() or initializeServer() first",
+      );
+    }
+    return this._instance;
+  }
+
+  /**
+   * Gets the authentication repository instance.
    * @private
-   * @returns {AuthRepository} The repository instance for authentication-related API calls.
+   * @returns {AuthRepository} The repository for auth operations
    */
   private get repo(): AuthRepository {
     return new AuthRepository();
   }
 
   /**
-   * Retrieves the current user's authentication token.
-   * @returns {string | undefined} The token of the currently authenticated user.
+   * Gets the current authentication token.
+   * @returns {string | undefined} The current token or undefined if not authenticated
    */
   getUserToken(): string | undefined {
-    return this.currentUser?.token;
+    return this.tokenHandler.getUserToken();
   }
 
   /**
-   * Gets the currently logged-in user.
-   * @returns {User | undefined} The current user object, or `undefined` if no user is logged in.
+   * Gets the currently authenticated user.
+   * @returns {User | undefined} The current user or undefined if not authenticated
    */
   get currentUser(): User | undefined {
-    return store.getState().getUser();
-  }
-  /**
-   * React hook that retrieves the currently authenticated user from the global store.
-   *
-   * @returns {User | undefined} The current user object if authenticated, or `undefined` if no user is logged in.
-   */
-  useCurrentUser(): User | undefined {
-    return useStore(store).getUser();
+    return this.store.getUser();
   }
 
   /**
-   * Checks if the current user has the specified permission.
-   * @param {Permission} perm - The permission to check.
-   * @returns {boolean} `true` if the user has the permission, otherwise `false`.
+   * React hook for accessing the current user in client-side code.
+   * @throws {Error} If called in a server environment
+   * @returns {User | undefined} The current user or undefined if not authenticated
+   */
+  useCurrentUser(): User | undefined {
+    if (typeof window === "undefined") {
+      throw new Error(
+        "useCurrentUser can only be called in browser environment",
+      );
+    }
+    return useClientUser();
+  }
+
+  /**
+   * Checks if the current user has a specific permission.
+   * @param {Permission} perm - The permission to check
+   * @returns {boolean} True if the user has the permission, false otherwise
    */
   checkPermission(perm: Permission): boolean {
     return this.currentUser?.can(perm) ?? false;
   }
 
   /**
-   * Logs in a user with the provided email and password.
-   * @param {string} email - The user's email address.
-   * @param {string} password - The user's password.
-   * @returns {Promise<User>} A promise that resolves to the authenticated user.
-   * @throws Will throw an error if authentication fails.
+   * Authenticates a user with email and password.
+   * @param {string} email - The user's email
+   * @param {string} password - The user's password
+   * @returns {Promise<User>} Promise resolving to the authenticated user
+   * @throws Will throw an error if authentication fails
    */
   async logIn(email: string, password: string): Promise<User> {
     const user = await this.repo.logIn(email, password);
     this.clearSavedData();
-    store.getState().setUser(user);
+    this.store.setUser(user);
+    this.tokenHandler.setUserToken(user.token);
     return user;
   }
 
   /**
-   * Resets the user's password.
-   * @param {string} current - The current password.
-   * @param {string} updated - The new password.
-   * @returns {Promise<boolean>} A promise that resolves to `true` if the operation is successful.
-   * @throws Will throw an error if the reset fails.
+   * Updates the user's password.
+   * @param {string} current - The current password
+   * @param {string} updated - The new password
+   * @returns {Promise<boolean>} Promise resolving to true if successful
+   * @throws Will throw an error if the password update fails
    */
   async resetPassword(current: string, updated: string): Promise<boolean> {
     await this.repo.updatePassword(current, updated);
@@ -100,57 +171,18 @@ export class AfloatAuth {
   }
 
   /**
-   * Logs out the current user and clears session data.
+   * Logs out the current user.
    */
   logOut(): void {
     this.clearSavedData();
   }
 
   /**
-   * Clears saved authentication data from the store and session storage.
+   * Clears all authentication data.
    * @private
    */
   private clearSavedData(): void {
-    store.getState().refresh();
-    sessionStorage.removeItem(AUTH_STORE_SESSION_STORAGE_KEY);
+    this.store.refresh();
+    this.tokenHandler.clearToken();
   }
 }
-
-type State = { user: string | undefined };
-
-interface Actions {
-  setUser: (user: User) => void;
-  getUser: () => User | undefined;
-  refresh: () => void;
-}
-
-const initialState: State = { user: undefined };
-
-const store: UseBoundStore<StoreApi<State & Actions>> = create<
-  State & Actions,
-  // deno-lint-ignore no-explicit-any
-  any
->(
-  persist(
-    (set, get) => ({
-      ...initialState,
-
-      getUser: () => {
-        try {
-          const jsonUser = get().user;
-          if (jsonUser) return User.fromJSON(jsonUser);
-        } catch (_) {
-          console.log(_);
-        }
-
-        return undefined;
-      },
-      setUser: (user) => set({ user: user.toJSON() }),
-      refresh: () => set(initialState),
-    }),
-    {
-      name: AUTH_STORE_SESSION_STORAGE_KEY,
-      storage: createJSONStorage(() => sessionStorage),
-    },
-  ),
-);
