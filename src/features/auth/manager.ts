@@ -9,8 +9,7 @@ import {
 import { ClientTokenHandler } from "@features/auth/storage/client_token_handler.ts";
 import { ServerStore } from "@features/auth/storage/server_store.ts";
 import { ServerTokenHandler } from "@features/auth/storage/server_token_handler.ts";
-
-let _instance: AfloatAuth | null = null;
+import { EnvironmentDetector } from "../../utils/env_detect.ts";
 
 /**
  * Main authentication class that works in both client and server environments.
@@ -22,6 +21,8 @@ export class AfloatAuth {
 
   /** The token handler implementation */
   private tokenHandler: TokenHandler;
+
+  private static _instance: AfloatAuth | null = null;
 
   /**
    * Private constructor to prevent direct instantiation.
@@ -39,11 +40,11 @@ export class AfloatAuth {
    * @returns {AfloatAuth} The singleton instance configured for client-side
    */
   public static initializeClient(): AfloatAuth {
-    _instance = new AfloatAuth(
+    this._instance = new AfloatAuth(
       createClientStore(),
       ClientTokenHandler.instance,
     );
-    return _instance;
+    return this._instance;
   }
 
   /**
@@ -67,8 +68,8 @@ export class AfloatAuth {
       store.setUser(user);
 
       // Create and initialize auth instance
-      _instance = new AfloatAuth(store, tokenHandler);
-      return _instance;
+      this._instance = new AfloatAuth(store, tokenHandler);
+      return this._instance;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to initialize server auth: ${error.message}`);
@@ -84,12 +85,14 @@ export class AfloatAuth {
    * @returns {AfloatAuth} The singleton instance
    */
   public static get instance(): AfloatAuth {
-    if (_instance === null) {
-      throw new Error(
-        "AfloatAuth not initialized. Call initializeClient() or initializeServer() first",
-      );
+    if (!this._instance) {
+      if (EnvironmentDetector.isClient()) {
+        return this.initializeClient();
+      }
+      throw new Error("AfloatAuth has not been initialized");
     }
-    return _instance;
+    
+    return this._instance;
   }
 
   /**
