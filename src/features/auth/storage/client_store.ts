@@ -1,6 +1,6 @@
 import { User } from "@models/user/index.ts";
-import { create, type StoreApi, type UseBoundStore } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { create, type StoreApi, type UseBoundStore, useStore } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { AuthStore } from "@features/auth/storage/types.ts";
 
 /** Key used for storing auth data in session storage */
@@ -66,5 +66,5 @@ export const createClientStore = (): AuthStore => {
  * @returns {User | undefined} The current user or undefined if not authenticated
  */
 export const useClientUser = (): User | undefined => {
-  return clientStore((state) => state.getUser());
+  return useStore(clientStore).getUser();
 };
