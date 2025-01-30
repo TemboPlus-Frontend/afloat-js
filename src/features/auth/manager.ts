@@ -9,7 +9,6 @@ import {
 import { ClientTokenHandler } from "@features/auth/storage/client_token_handler.ts";
 import { ServerStore } from "@features/auth/storage/server_store.ts";
 import { ServerTokenHandler } from "@features/auth/storage/server_token_handler.ts";
-import { EnvironmentDetector } from "../../utils/env_detect.ts";
 
 /**
  * Main authentication class that works in both client and server environments.
@@ -22,8 +21,8 @@ export class AfloatAuth {
   /** The token handler implementation */
   private tokenHandler: TokenHandler;
 
+  /** client AfloatAuth instance */
   private static _instance: AfloatAuth | null = null;
-
   /**
    * Private constructor to prevent direct instantiation.
    * @param {AuthStore} store - The auth store implementation to use
@@ -35,23 +34,31 @@ export class AfloatAuth {
   }
 
   /**
-   * Initializes AfloatAuth for client-side use.
-   * This should be called once at application startup in client environments.
-   * @returns {AfloatAuth} The singleton instance configured for client-side
+   * Gets or creates the client-side singleton instance of AfloatAuth.
+   * This getter will automatically initialize the client instance if it hasn't been created yet.
+   * For server-side usage, use initializeServer() instead.
+   *
+   * @returns {AfloatAuth} The client-side singleton instance
+   * @example
+   * // Client-side usage
+   * const auth = AfloatAuth.instance;
+   *
+   * // Server-side usage (don't use .instance)
+   * const serverAuth = await AfloatAuth.initializeServer(token);
    */
-  public static initializeClient(): AfloatAuth {
-    this._instance = new AfloatAuth(
+  public static get instance(): AfloatAuth {
+    return AfloatAuth._instance || (AfloatAuth._instance = new AfloatAuth(
       createClientStore(),
       ClientTokenHandler.instance,
-    );
-    return this._instance;
+    ));
   }
 
   /**
-   * Creates a new instance of AfloatAuth configured for server-side use.
-   * Initializes the user by fetching necessary data using the provided token.
+   * Creates a new server-side instance of AfloatAuth.
+   * Unlike the client-side instance getter, this creates a new instance each time.
+   *
    * @param {string} token - Authentication token
-   * @returns {Promise<AfloatAuth>} A new instance configured for server-side
+   * @returns {Promise<AfloatAuth>} A new server-side instance
    * @throws {Error} If token is invalid or required data cannot be fetched
    */
   public static async initializeServer(token: string): Promise<AfloatAuth> {
@@ -68,8 +75,7 @@ export class AfloatAuth {
       store.setUser(user);
 
       // Create and initialize auth instance
-      this._instance = new AfloatAuth(store, tokenHandler);
-      return this._instance;
+      return new AfloatAuth(store, tokenHandler);
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to initialize server auth: ${error.message}`);
@@ -77,22 +83,6 @@ export class AfloatAuth {
 
       throw new Error("Failed to initialize server auth");
     }
-  }
-
-  /**
-   * Gets the singleton instance of AfloatAuth.
-   * @throws {Error} If AfloatAuth hasn't been initialized
-   * @returns {AfloatAuth} The singleton instance
-   */
-  public static get instance(): AfloatAuth {
-    if (!this._instance) {
-      if (EnvironmentDetector.isClient()) {
-        return this.initializeClient();
-      }
-      throw new Error("AfloatAuth has not been initialized");
-    }
-    
-    return this._instance;
   }
 
   /**
