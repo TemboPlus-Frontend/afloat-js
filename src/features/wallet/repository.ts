@@ -7,7 +7,7 @@ import type {
   WalletStatementItem,
 } from "@models/wallet/index.ts";
 import { AfloatFilesRepo } from "@features/files-gen/repository.ts";
-import { AfloatAuth } from "@features/auth/manager.ts";
+import type { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { PermissionError } from "@errors/index.ts";
 
@@ -19,9 +19,15 @@ import { PermissionError } from "@errors/index.ts";
 export class WalletRepo extends BaseRepository<typeof contract> {
   /**
    * Creates an instance of WalletRepo initialized with the wallet contract.
+   * @param {Object} [options] - Optional configuration
+   * @param {string} [options.root] - Custom API root URL
+   * @param {AfloatAuth} [options.auth] - Auth instance to use
    */
-  constructor() {
-    super("wallet", contract);
+  constructor(props?: { root?: string; auth?: AfloatAuth }) {
+    super("wallet", contract, {
+      root: props?.root,
+      auth: props?.auth,
+    });
   }
 
   /**
@@ -30,7 +36,7 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @returns {AfloatFilesRepo} A new instance of AfloatFilesRepo
    */
   private get fileGenRepo(): AfloatFilesRepo {
-    return new AfloatFilesRepo();
+    return new AfloatFilesRepo({ auth: this.auth });
   }
 
   /**
@@ -40,8 +46,10 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @returns {Promise<number>} The available balance amount
    */
   async getBalance(): Promise<number> {
+    const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewBalance;
-    if (!AfloatAuth.instance.checkPermission(requirePerm)) {
+
+    if (!auth.checkPermission(requirePerm)) {
       throw new PermissionError({
         message: "You are not authorized to view the account balance.",
         requiredPermissions: [requirePerm],
@@ -90,8 +98,10 @@ export class WalletRepo extends BaseRepository<typeof contract> {
       accountNo?: string;
     },
   ): Promise<WalletStatementItem[]> {
+    const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewStatement;
-    if (!AfloatAuth.instance.checkPermission(requirePerm)) {
+
+    if (!auth.checkPermission(requirePerm)) {
       throw new PermissionError({
         message: "You are not authorized to view the statement.",
         requiredPermissions: [requirePerm],
@@ -133,8 +143,10 @@ export class WalletRepo extends BaseRepository<typeof contract> {
       accountNo?: string;
     },
   ): Promise<StatementFile> {
+    const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewStatement;
-    if (!AfloatAuth.instance.checkPermission(requirePerm)) {
+
+    if (!auth.checkPermission(requirePerm)) {
       throw new PermissionError({
         message: "You are not authorized to view the statement.",
         requiredPermissions: [requirePerm],
@@ -155,8 +167,10 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @returns {Promise<StatementFile>} The generated PDF file containing wallet details
    */
   async genWalletDetailsPDF(): Promise<StatementFile> {
+    const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewBalance;
-    if (!AfloatAuth.instance.checkPermission(requirePerm)) {
+
+    if (!auth.checkPermission(requirePerm)) {
       throw new PermissionError({
         message: "You are not authorized to view the account details.",
         requiredPermissions: [requirePerm],

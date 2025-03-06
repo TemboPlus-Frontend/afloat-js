@@ -5,7 +5,7 @@ import {
   PAYOUT_APPROVAL_STATUS,
   type PayoutInput,
 } from "@models/payout/index.ts";
-import { AfloatAuth } from "@features/auth/manager.ts";
+import type { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { APIError, PermissionError } from "@errors/index.ts";
 import { Payout } from "@models/payout/derivatives/payout.ts";
@@ -18,9 +18,11 @@ import { Payout } from "@models/payout/derivatives/payout.ts";
 export class PayoutRepository extends BaseRepository<PayoutAPI> {
   /**
    * Creates an instance of PayoutRepository initialized with the payout contract.
+   * @param {Object} [props] - Optional constructor properties
+   * @param {AfloatAuth} [props.auth] - Optional auth instance to use
    */
-  constructor() {
-    super("payout", contract);
+  constructor(props?: { auth?: AfloatAuth }) {
+    super("payout", contract, { auth: props?.auth });
   }
 
   /**
@@ -37,8 +39,10 @@ export class PayoutRepository extends BaseRepository<PayoutAPI> {
     results: Payout[];
     total: number;
   }> {
+    const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.Payout.List;
-    if (!AfloatAuth.instance.checkPermission(requiredPerm)) {
+    
+    if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({
         message: "You are not authorized to view payouts.",
         requiredPermissions: [requiredPerm],
@@ -87,8 +91,10 @@ export class PayoutRepository extends BaseRepository<PayoutAPI> {
    * @returns {Promise<Payout>} The created payout
    */
   async pay(input: PayoutInput): Promise<Payout> {
+    const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.Payout.Create;
-    if (!AfloatAuth.instance.checkPermission(Permissions.Payout.Create)) {
+    
+    if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({
         message: "You are not authorized to create payouts.",
         requiredPermissions: [requiredPerm],
@@ -114,8 +120,10 @@ export class PayoutRepository extends BaseRepository<PayoutAPI> {
    * @returns {Promise<Payout>} The approved payout
    */
   async approve(id: string, args?: { notes?: string }): Promise<Payout> {
+    const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.Payout.Approve;
-    if (!AfloatAuth.instance.checkPermission(requiredPerm)) {
+    
+    if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({
         message: "You are not authorized to approve or reject payouts.",
         requiredPermissions: [requiredPerm],
@@ -153,8 +161,10 @@ export class PayoutRepository extends BaseRepository<PayoutAPI> {
    * @returns {Promise<Payout>} The rejected payout
    */
   async reject(id: string, args?: { notes?: string }): Promise<Payout> {
+    const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.Payout.Approve;
-    if (!AfloatAuth.instance.checkPermission(requiredPerm)) {
+    
+    if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({
         message: "You are not authorized to approve or reject payouts.",
         requiredPermissions: [requiredPerm],

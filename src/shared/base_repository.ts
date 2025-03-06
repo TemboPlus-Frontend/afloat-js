@@ -3,7 +3,7 @@ import { APIError } from "@errors/api_error.ts";
 import { v4 as uuidv4 } from "uuid";
 import type { InitClientArgs } from "@ts-rest/core";
 import type { Common400APIResponse } from "@shared/index.ts";
-import { AfloatAuth } from "@features/auth/index.ts";
+import { AfloatAuth, AuthContext } from "@features/auth/manager.ts";
 
 /**
  * BaseRepository
@@ -37,26 +37,87 @@ export class BaseRepository<TContract extends AppRouter> {
   protected root: string | undefined;
 
   /**
+   * The auth instance to use for authentication
+   * 
+   * @protected
+   */
+  protected auth: AfloatAuth | undefined;
+
+  /**
    * Constructs a new instance of `BaseRepository`.
    *
-   * @param contract - The "ts-rest" contract
    * @param endpoint - API endpoint
+   * @param contract - The "ts-rest" contract
+   * @param args - Optional constructor arguments
+   * @param args.root - Optional API root URL
+   * @param args.auth - Optional auth instance to use
    */
-  constructor(endpoint: string, contract: TContract, args?: { root?: string }) {
+  constructor(endpoint: string, contract: TContract, args?: { 
+    root?: string;
+    auth?: AfloatAuth;
+  }) {
     this.contract = contract;
     this.endpoint = endpoint;
     this.root = args?.root;
+    
+    // Use provided auth or try to get the current context
+    this.auth = args?.auth || AuthContext.current;
   }
 
+  /**
+   * Gets an auth instance that can be used for permission checks.
+   * Follows a fallback strategy to find a valid auth instance.
+   * 
+   * @protected
+   * @returns {AfloatAuth} A valid auth instance
+   * @throws {Error} If no valid auth instance is available
+   */
+  protected getAuthForPermissionCheck(): AfloatAuth {
+    // Use the instance provided in constructor, or fallback to context
+    const auth = this.auth || AuthContext.current;
+    
+    if (!auth) {
+      try {
+        // Last resort: try to get the client singleton
+        return AfloatAuth.instance;
+      } catch (_) {
+        throw new Error(`No valid auth instance available for ${this.endpoint} repository`);
+      }
+    }
+    
+    return auth;
+  }
+
+  /**
+   * Gets the initialized client for making API requests.
+   * Uses authentication token if available.
+   */
   get client() {
     const baseUrl = this.root
       ? `${this.root}/${this.endpoint}`
       : `https://api.afloat.money/v1/${this.endpoint}`;
 
+    let token = "";
+    
+    // Try to get token from the provided auth instance
+    if (this.auth) {
+      token = this.auth.getUserToken() ?? "";
+    } 
+    // Fall back to singleton if no auth was provided, but handle exceptions
+    // that occur in server environments
+    else {
+      try {
+        token = AfloatAuth.instance.getUserToken() ?? "";
+      } catch (_) {
+        // This will fail when called within the server without initialization
+        // We'll proceed with an empty token
+      }
+    }
+
     const args: InitClientArgs = {
       baseUrl,
       baseHeaders: {
-        "token": AfloatAuth.instance.getUserToken() ?? "",
+        "token": token,
         "x-request-id": uuidv4(),
       },
     };

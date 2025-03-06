@@ -11,6 +11,16 @@ import { ServerStore } from "@features/auth/storage/server_store.ts";
 import { ServerTokenHandler } from "@features/auth/storage/server_token_handler.ts";
 
 /**
+ * Global context to hold the current auth instance reference.
+ * This provides a way to access the auth instance across the application
+ * without directly coupling to the singleton pattern.
+ */
+export const AuthContext = {
+  // Default undefined state - will be set during initialization
+  current: undefined as AfloatAuth | undefined,
+};
+
+/**
  * Main authentication class that works in both client and server environments.
  * Provides authentication functionality and user management.
  */
@@ -23,8 +33,9 @@ export class AfloatAuth {
 
   /** client AfloatAuth instance */
   private static _instance: AfloatAuth | null = null;
+  
   /**
-   * Private constructor to prevent direct instantiation.
+   * Private constructor to maintain control over instantiation.
    * @param {AuthStore} store - The auth store implementation to use
    * @param {TokenHandler} tokenHandler - The token handler implementation to use
    */
@@ -47,10 +58,17 @@ export class AfloatAuth {
    * const serverAuth = await AfloatAuth.initializeServer(token);
    */
   public static get instance(): AfloatAuth {
-    return AfloatAuth._instance || (AfloatAuth._instance = new AfloatAuth(
-      createClientStore(),
-      ClientTokenHandler.instance,
-    ));
+    if (!AfloatAuth._instance) {
+      AfloatAuth._instance = new AfloatAuth(
+        createClientStore(),
+        ClientTokenHandler.instance
+      );
+      
+      // Set as current instance for global access
+      AuthContext.current = AfloatAuth._instance;
+    }
+    
+    return AfloatAuth._instance;
   }
 
   /**
@@ -75,9 +93,15 @@ export class AfloatAuth {
       store.setUser(user);
 
       // Create and initialize auth instance
-      return new AfloatAuth(store, tokenHandler);
+      const auth = new AfloatAuth(store, tokenHandler);
+      
+      // Set as current instance for global access
+      AuthContext.current = auth;
+      
+      return auth;
     } catch (error) {
       if (error instanceof Error) {
+        console.log(error.stack);
         throw new Error(`Failed to initialize server auth: ${error.message}`);
       }
 

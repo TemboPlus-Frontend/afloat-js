@@ -6,6 +6,7 @@ import type {
   ClientInferResponseBody,
 } from "@ts-rest/core";
 import type { StatementFile } from "@models/wallet/index.ts";
+import type { AfloatAuth } from "@features/auth/index.ts";
 
 /**
  * Type definition for statement generation input parameters.
@@ -35,9 +36,11 @@ export class AfloatFilesRepo extends BaseRepository<typeof contract> {
    * Creates an instance of AfloatFilesRepo initialized with the files generation contract.
    * Configures the repository with the PDF maker service endpoint.
    */
-  constructor() {
+  constructor(props?: { auth?: AfloatAuth }) {
     super("wallet", contract, {
       root: "https://api.afloat.money/pdf-maker/afloat",
+      // root: "http://localhost:3000/afloat",
+      auth: props?.auth,
     });
   }
 
@@ -58,6 +61,13 @@ export class AfloatFilesRepo extends BaseRepository<typeof contract> {
 
     if (result.status === 201) {
       return result.body;
+    }
+
+    if (result.status === 202) {
+      throw new APIError({
+        message: result.body.message,
+        statusCode: 202,
+      });
     }
 
     throw APIError.unknown("An error occurred while generating statement PDF");
