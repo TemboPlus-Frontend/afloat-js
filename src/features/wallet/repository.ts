@@ -1,12 +1,9 @@
 import { BaseRepository } from "@shared/base_repository.ts";
 import { contract } from "@features/wallet/contract.ts";
 import type {
-  STATEMENT_OUTPUT_TYPE,
-  StatementFile,
   Wallet,
   WalletStatementItem,
 } from "@models/wallet/index.ts";
-import { AfloatFilesRepo } from "@features/files-gen/repository.ts";
 import type { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { PermissionError } from "@errors/index.ts";
@@ -28,15 +25,6 @@ export class WalletRepo extends BaseRepository<typeof contract> {
       root: props?.root,
       auth: props?.auth,
     });
-  }
-
-  /**
-   * Gets an instance of the file generation repository.
-   * @private
-   * @returns {AfloatFilesRepo} A new instance of AfloatFilesRepo
-   */
-  private get fileGenRepo(): AfloatFilesRepo {
-    return new AfloatFilesRepo({ auth: this.auth });
   }
 
   /**
@@ -123,60 +111,5 @@ export class WalletRepo extends BaseRepository<typeof contract> {
     }
 
     throw new Error("An error occured while fetching statement");
-  }
-
-  /**
-   * Generates a statement file for the specified period and account.
-   * @param {STATEMENT_OUTPUT_TYPE} fileType - The desired output format type for the statement
-   * @param {Object} props - The statement generation properties
-   * @param {Date} props.startDate - Start date for the statement period
-   * @param {Date} props.endDate - End date for the statement period
-   * @param {string} [props.accountNo] - Optional account number to generate statement for
-   * @throws {PermissionError} If user lacks the ViewStatement permission
-   * @returns {Promise<StatementFile>} The generated statement file
-   */
-  async genStatement(
-    fileType: STATEMENT_OUTPUT_TYPE,
-    props: {
-      startDate: Date;
-      endDate: Date;
-      accountNo?: string;
-    },
-  ): Promise<StatementFile> {
-    const auth = this.getAuthForPermissionCheck();
-    const requirePerm = Permissions.Wallet.ViewStatement;
-
-    if (!auth.checkPermission(requirePerm)) {
-      throw new PermissionError({
-        message: "You are not authorized to view the statement.",
-        requiredPermissions: [requirePerm],
-      });
-    }
-
-    return await this.fileGenRepo.downloadStatement({
-      start_date: props.startDate,
-      end_date: props.endDate,
-      return_file_type: fileType,
-      account_no: props.accountNo,
-    });
-  }
-
-  /**
-   * Generates a PDF containing detailed wallet account information.
-   * @throws {PermissionError} If user lacks the ViewBalance permission
-   * @returns {Promise<StatementFile>} The generated PDF file containing wallet details
-   */
-  async genWalletDetailsPDF(): Promise<StatementFile> {
-    const auth = this.getAuthForPermissionCheck();
-    const requirePerm = Permissions.Wallet.ViewBalance;
-
-    if (!auth.checkPermission(requirePerm)) {
-      throw new PermissionError({
-        message: "You are not authorized to view the account details.",
-        requiredPermissions: [requirePerm],
-      });
-    }
-
-    return await this.fileGenRepo.genAccountDetailsPDF();
   }
 }

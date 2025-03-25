@@ -36,9 +36,8 @@ export class AuthRepository extends BaseRepository<typeof authContract> {
     if (result.status === 201) {
       const repo = new LoginRepository();
       const loginCredentials = await repo.getIdentity(result.body.token);
-
-      const user: User = new User({ ...result.body, loginCredentials });
-      return user;
+      const user = User.from({ ...result.body, ...loginCredentials });
+      if (user) return user;
     }
 
     throw new APIError({

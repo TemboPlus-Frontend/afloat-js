@@ -1,4 +1,4 @@
-import { Amount, Bank, PhoneNumber } from "@temboplus/frontend-core";
+import { Amount, Bank, TZPhoneNumber } from "@temboplus/frontend-core";
 import type { PayoutApprover, PayoutData } from "@models/payout/index.ts";
 import { PayoutSchemas } from "@models/payout/schemas.ts";
 import {
@@ -154,7 +154,7 @@ export class Payout {
     let contactInfo: ContactInfo | undefined;
 
     // extracting mobile contact information
-    const phone = PhoneNumber.from(this.data.msisdn);
+    const phone = TZPhoneNumber.from(this.data.msisdn);
     if (phone) {
       contactInfo = new MobileContactInfo(this.data.payeeName, phone);
     }

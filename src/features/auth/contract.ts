@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { initContract } from "@ts-rest/core";
-import { profileSchema } from "@models/index.ts";
+import { Profile } from "@models/index.ts";
 
 /**
  * Auth API contract
@@ -16,7 +16,7 @@ export const authContract = initContract().router({
     }),
     responses: {
       201: z.object({
-        profile: profileSchema,
+        profile: Profile.schema,
         token: z.string(),
         access: z.array(z.string()),
         resetPassword: z.boolean(),

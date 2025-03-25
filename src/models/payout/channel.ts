@@ -1,4 +1,4 @@
-import type { PhoneNumber } from "@temboplus/frontend-core"
+import type { TZPhoneNumber } from "@temboplus/frontend-core"
 
 /**
  * Represents the available channels through which payouts can be processed.
@@ -56,11 +56,11 @@ export const createPayoutChannelCode = {
 
   /**
    * Creates a mobile money channel code based on the telecom provider
-   * @param {PhoneNumber} phoneNumber - Phone number object containing telecom information
+   * @param {TZPhoneNumber} phoneNumber - Phone number object containing telecom information
    * @returns {PayoutChannelCode} Channel code in format "TZ-{TELECOM}-B2C"
    *
-   * @see {@link PhoneNumber} from "@jsr/temboplus__tembo-core" for phone number structure
+   * @see {@link TZPhoneNumber} from "@jsr/temboplus__tembo-core" for phone number structure
    */
-  mobile: (phoneNumber: PhoneNumber): PayoutChannelCode =>
+  mobile: (phoneNumber: TZPhoneNumber): PayoutChannelCode =>
     `TZ-${phoneNumber.networkOperator.id.toString().toUpperCase()}-B2C` as PayoutChannelCode,
 };

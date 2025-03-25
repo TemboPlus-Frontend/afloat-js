@@ -1,8 +1,9 @@
+// deno-lint-ignore-file no-explicit-any
 import { Permissions } from "@models/permission.ts";
-import type { Profile } from "@models/user/profile.ts";
+import { Profile } from "@models/user/profile.ts";
 
 /**
- * Represents a user in Afloat
+ * Represents a user in Afloat.
  *
  * This class centralizes user-related logic, simplifying interaction
  * with user-related data and ensuring consistent permission checks across the application.
@@ -46,27 +47,24 @@ export class User {
   /**
    * Creates a new instance of the `User` class.
    *
-   * @param userData - An object of type `CoreUser` containing the user's profile, token,
+   * @param userData - An object containing the user's profile, token,
    * permissions (access list), and the `resetPassword` flag.
    */
-  constructor(data: {
+  private constructor(data: {
     profile: Profile;
     token: string;
     access: string[];
     resetPassword: boolean;
-    loginCredentials: {
-      name: string;
-      identity: string;
-    };
+    name: string;
+    identity: string;
   }) {
-    const { profile, token, access, resetPassword } = data;
+    const { profile, token, access, resetPassword, name, identity } = data;
 
     this.profile = profile;
     this.token = token;
     this.resetPassword = resetPassword;
-
-    this.name = data.loginCredentials.name;
-    this.identity = data.loginCredentials.identity;
+    this.name = name;
+    this.identity = identity;
 
     // Initialize the permissions map
     this.permissionsMap = {};
@@ -75,6 +73,8 @@ export class User {
         Object.values(permission).forEach((perm) => {
           this.permissionsMap[perm] = access.includes(perm);
         });
+      } else {
+        this.permissionsMap[permission] = access.includes(permission);
       }
     }
   }
@@ -93,14 +93,14 @@ export class User {
    * Serializes the `User` instance to a JSON string.
    *
    * @returns A JSON string representation of the `User` instance, including:
-   * - `profile`: The user's profile information.
+   * - `profile`: The user's profile information. (Requires profile.toJSON() method)
    * - `token`: The user's authentication token.
    * - `resetPassword`: Indicates whether the user must reset their password.
    * - `permissions`: An array of permission keys the user has.
    */
   public toJSON(): string {
     return JSON.stringify({
-      profile: this.profile,
+      profile: this.profile.toJSON(),
       token: this.token,
       resetPassword: this.resetPassword,
       name: this.name,
@@ -115,33 +115,75 @@ export class User {
    * Creates a new `User` instance from a JSON string.
    *
    * @param jsonString - A JSON string containing user data.
-   * @returns A `User` instance reconstructed from the JSON data.
-   * @throws Will throw an error if the JSON data is invalid or incomplete.
+   * @returns A `User` instance reconstructed from the JSON data, or undefined if jsonString is invalid.
    */
-  public static fromJSON(jsonString: string): User {
-    const data = JSON.parse(jsonString);
+  public static fromJSON(jsonString: string): User | undefined {
+    try {
+      return User.from(JSON.parse(jsonString));
+    } catch (e) {
+      console.error("Invalid JSON string:", e);
+      return undefined;
+    }
+  }
 
-    if (
-      !data.profile ||
-      !data.token ||
-      !data.name ||
-      !data.identity ||
-      !Array.isArray(data.permissions) ||
-      typeof data.resetPassword !== "boolean"
-    ) {
-      throw new Error("Invalid JSON data for User");
+  /**
+   * Creates a new `User` instance from a data object, JSON string, or object with a Profile instance/object.
+   *
+   * @param data - The data object, JSON string, or object with Profile instance/object containing user information.
+   * @returns A `User` instance, or undefined if data is invalid.
+   */
+  public static from(data: any): User | undefined {
+    let parsedData: any;
+
+    if (typeof data === "string") {
+      try {
+        parsedData = JSON.parse(data);
+      } catch (error) {
+        console.error("Invalid JSON string:", error);
+        return undefined;
+      }
+    } else {
+      parsedData = data;
     }
 
-    // Reconstruct the CoreUser structure
+    if (!parsedData) {
+      console.error("Data is null or undefined.");
+      return undefined;
+    }
+
+    let profile: Profile | undefined;
+
+    if (parsedData.profile instanceof Profile) {
+      profile = parsedData.profile;
+    } else if (typeof parsedData.profile === "object") {
+      profile = Profile.from(parsedData.profile);
+      if (!profile) {
+        console.error("Invalid profile data:", parsedData.profile);
+        return undefined;
+      }
+    } else {
+      console.error("Invalid profile type:", parsedData.profile);
+      return undefined;
+    }
+
+    if (
+      typeof parsedData.token !== "string" ||
+      typeof parsedData.name !== "string" ||
+      typeof parsedData.identity !== "string" ||
+      !Array.isArray(parsedData.access) ||
+      typeof parsedData.resetPassword !== "boolean"
+    ) {
+      console.error("Invalid user data:", parsedData);
+      return undefined;
+    }
+
     const args = {
-      profile: data.profile,
-      token: data.token,
-      access: data.permissions,
-      resetPassword: data.resetPassword,
-      loginCredentials: {
-        name: data.name,
-        identity: data.identity,
-      },
+      profile: profile!,
+      token: parsedData.token,
+      access: parsedData.access,
+      resetPassword: parsedData.resetPassword,
+      name: parsedData.name,
+      identity: parsedData.identity,
     };
 
     return new User(args);

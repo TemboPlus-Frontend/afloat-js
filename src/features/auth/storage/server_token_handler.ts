@@ -60,12 +60,17 @@ export class ServerTokenHandler implements TokenHandler {
       logInRepo.getIdentity(token),
     ]);
 
-    return new User({
+    const user = User.from({
       token,
       profile,
       access,
       resetPassword: false,
-      loginCredentials: identity,
+      ...identity,
     });
+    if (!user) {
+      throw new Error("Failed to construct user");
+    }
+
+    return user;
   }
 }

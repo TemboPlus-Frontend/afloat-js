@@ -1,5 +1,9 @@
 import type { ContactType } from "@models/contact/index.ts";
-import { Bank, MobileNumberFormat, PhoneNumber } from "@temboplus/frontend-core";
+import {
+  Bank,
+  PhoneNumberFormat,
+  TZPhoneNumber,
+} from "@temboplus/frontend-core";
 import {
   validateAccName,
   validateBankAccNo,
@@ -81,17 +85,17 @@ abstract class BaseContactInfo {
  * @extends BaseContactInfo
  * @class MobileContactInfo
  * @property {string} name - The contact's personal name
- * @property {PhoneNumber} phoneNumber - The contact's phone number object
+ * @property {TZPhoneNumber} phoneNumber - The contact's phone number object
  */
 export class MobileContactInfo extends BaseContactInfo {
   /**
    * Creates a new mobile contact
    * @param {string} name - The contact's personal name
-   * @param {PhoneNumber} phoneNumber - The contact's phone number
+   * @param {TZPhoneNumber} phoneNumber - The contact's phone number
    */
   constructor(
     public readonly name: string,
-    public readonly phoneNumber: PhoneNumber,
+    public readonly phoneNumber: TZPhoneNumber,
   ) {
     super("Mobile");
   }
@@ -105,7 +109,7 @@ export class MobileContactInfo extends BaseContactInfo {
    */
   validate(): boolean {
     return this.phoneNumber !== undefined &&
-      PhoneNumber.canConstruct(this.phoneNumber.compactNumber) &&
+      TZPhoneNumber.canConstruct(this.phoneNumber.compactNumber) &&
       this.name.length > 0;
   }
 
@@ -121,14 +125,14 @@ export class MobileContactInfo extends BaseContactInfo {
    * if (MobileContactInfo.is(maybeContact)) {
    *   // maybeContact is typed as MobileContactInfo
    *   console.log(maybeContact.name);
-   *   console.log(maybeContact.phoneNumber.label);
+   *   console.log(maybeContact.TZPhoneNumber.label);
    * }
    *
    * @remarks
    * - Name must be a non-empty string
    * - Phone number can be either:
-   *   - A string that can be parsed into a valid PhoneNumber
-   *   - A PhoneNumber object with valid properties
+   *   - A string that can be parsed into a valid TZPhoneNumber
+   *   - A TZPhoneNumber object with valid properties
    * - Returns false if either property is invalid or missing
    */
   public static is(obj: unknown): obj is MobileContactInfo {
@@ -140,16 +144,16 @@ export class MobileContactInfo extends BaseContactInfo {
     if (typeof mobileContactInfo.name !== "string") return false;
     const name = mobileContactInfo.name;
 
-    // checks if phoneNumber exists and is valid
-    let phone_number: PhoneNumber | undefined = undefined;
+    // checks if TZPhoneNumber exists and is valid
+    let phone_number: TZPhoneNumber | undefined = undefined;
 
-    if (typeof mobileContactInfo.phoneNumber === "string") {
-      phone_number = PhoneNumber.from(mobileContactInfo.phoneNumber);
+    if (typeof mobileContactInfo.TZPhoneNumber === "string") {
+      phone_number = TZPhoneNumber.from(mobileContactInfo.TZPhoneNumber);
     }
 
-    if (typeof mobileContactInfo.phoneNumber === "object") {
-      const obj = mobileContactInfo.phoneNumber;
-      const isValidPhone = PhoneNumber.is(obj);
+    if (typeof mobileContactInfo.TZPhoneNumber === "object") {
+      const obj = mobileContactInfo.TZPhoneNumber;
+      const isValidPhone = TZPhoneNumber.is(obj);
       if (isValidPhone) {
         phone_number = obj;
       }
@@ -169,7 +173,7 @@ export class MobileContactInfo extends BaseContactInfo {
    * @returns {string} Formatted phone number
    */
   override get accNumber(): string {
-    return this.phoneNumber.getNumberWithFormat(MobileNumberFormat.s255);
+    return this.phoneNumber.getWithFormat(PhoneNumberFormat.INTERNATIONAL);
   }
 
   override get channel(): string {
@@ -264,7 +268,7 @@ export class BankContactInfo extends BaseContactInfo {
     if (typeof bankContactInfo.accNumber !== "string") return false;
     const accNumber = bankContactInfo.accNumber;
 
-    // checks if phoneNumber exists and is valid
+    // checks if TZPhoneNumber exists and is valid
     let bank: Bank | undefined = undefined;
 
     if (typeof bankContactInfo.bank === "object") {

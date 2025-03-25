@@ -4,7 +4,7 @@ import {
   type ContactType,
 } from "@models/contact/schemas.ts";
 import { MobileContactInfo } from "@models/contact/index.ts";
-import { Bank, PhoneNumber } from "@temboplus/frontend-core";
+import { Bank, TZPhoneNumber } from "@temboplus/frontend-core";
 import {
   BankContactInfo,
   type ContactInfo,
@@ -79,7 +79,7 @@ export class Contact {
    */
   get info(): ContactInfo | undefined {
     if (this.data.type === "Mobile") {
-      const phone = PhoneNumber.from(this.data.accountNo);
+      const phone = TZPhoneNumber.from(this.data.accountNo);
       if (phone) {
         return new MobileContactInfo(this.data.displayName, phone);
       }

@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { profileSchema } from "@models/index.ts";
+import { Profile } from "@models/index.ts";
 import { z } from "zod";
 
 /**
@@ -11,7 +11,7 @@ export const profileContract = initContract().router({
     path: "/me",
     headers: z.object({ token: z.string() }),
     responses: {
-      200: profileSchema,
+      200: Profile.schema,
     },
   },
 });
