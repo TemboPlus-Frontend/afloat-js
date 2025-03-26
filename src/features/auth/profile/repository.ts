@@ -1,19 +1,19 @@
 import { Profile } from "@models/index.ts";
-import { BaseRepository } from "@shared/base_repository.ts";
 import { APIError } from "@errors/api_error.ts";
 import { profileContract } from "@features/auth/profile/contract.ts";
+import { TokenRequiredRepository } from "../../../shared/token_required_repository.ts";
 
-export class ProfileRepository extends BaseRepository<typeof profileContract> {
+export class ProfileRepository extends TokenRequiredRepository<typeof profileContract> {
   /**
    * Initializes an instance of ProfileRepository.
    */
   constructor() {
-    super("profile", profileContract);
+    super("profile", profileContract, "");
   }
 
   async getCurrentProfile(token: string): Promise<Profile> {
-    const headers = { token };
-    const result = await this.client.getCurrentProfile({ headers });
+    this.setToken(token)
+    const result = await this.client.getCurrentProfile();
     if (result.status === 200) {
       const profile =  Profile.from(result.body);
       if(profile) return profile;

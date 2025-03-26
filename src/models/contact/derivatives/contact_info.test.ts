@@ -3,7 +3,7 @@ import {
   BankContactInfo,
   MobileContactInfo,
 } from "@models/contact/derivatives/contact_info.ts";
-import { Bank, PhoneNumber } from "@temboplus/frontend-core";
+import { Bank, TZPhoneNumber } from "@temboplus/frontend-core";
 
 Deno.test("MobileContactInfo.is", async (t) => {
   // Valid inputs with string phone number
@@ -27,7 +27,7 @@ Deno.test("MobileContactInfo.is", async (t) => {
 
   // Valid inputs with PhoneNumber object
   await t.step("accepts valid object with PhoneNumber instance", () => {
-    const phoneNumber = PhoneNumber.from("+255712345678");
+    const phoneNumber = TZPhoneNumber.from("+255712345678");
     assertEquals(
       MobileContactInfo.is({
         name: "John Doe",

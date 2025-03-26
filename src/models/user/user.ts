@@ -100,7 +100,7 @@ export class User {
    */
   public toJSON(): string {
     return JSON.stringify({
-      profile: this.profile.toJSON(),
+      profile: this.profile.toObject(),
       token: this.token,
       resetPassword: this.resetPassword,
       name: this.name,
@@ -135,6 +135,7 @@ export class User {
   public static from(data: any): User | undefined {
     let parsedData: any;
 
+    // Parse JSON string if needed
     if (typeof data === "string") {
       try {
         parsedData = JSON.parse(data);
@@ -151,36 +152,71 @@ export class User {
       return undefined;
     }
 
+    // Handle different profile formats
     let profile: Profile | undefined;
+    let rawProfile: any = parsedData.profile;
 
-    if (parsedData.profile instanceof Profile) {
-      profile = parsedData.profile;
-    } else if (typeof parsedData.profile === "object") {
-      profile = Profile.from(parsedData.profile);
+    // Handle stringified profile (the case in the provided sample)
+    if (typeof rawProfile === "string") {
+      try {
+        // Attempt to parse the stringified profile
+        rawProfile = JSON.parse(rawProfile);
+      } catch (error) {
+        console.error("Failed to parse profile JSON string:", error);
+        return undefined;
+      }
+    }
+
+    // Create Profile instance based on what we received
+    if (Profile.is(rawProfile)) {
+      // Already a Profile instance
+      profile = rawProfile;
+    } else if (typeof rawProfile === "object" && rawProfile !== null) {
+      // Convert object to Profile instance
+      profile = Profile.from(rawProfile);
       if (!profile) {
-        console.error("Invalid profile data:", parsedData.profile);
+        console.error("Failed to create Profile from data:", rawProfile);
+        return undefined;
+      }
+    } else if (typeof rawProfile === "string") {
+      profile = Profile.fromJSON(rawProfile);
+      if (!profile) {
+        console.error("Failed to create Profile from JSON data:", rawProfile);
         return undefined;
       }
     } else {
-      console.error("Invalid profile type:", parsedData.profile);
+      console.error("Invalid profile format:", typeof rawProfile);
       return undefined;
     }
 
+    // Validate other required fields
     if (
-      typeof parsedData.token !== "string" ||
-      typeof parsedData.name !== "string" ||
-      typeof parsedData.identity !== "string" ||
-      !Array.isArray(parsedData.access) ||
+      !parsedData.token || typeof parsedData.token !== "string" ||
+      !parsedData.name || typeof parsedData.name !== "string" ||
+      !parsedData.identity || typeof parsedData.identity !== "string" ||
+      !Array.isArray(parsedData.permissions) &&
+        !Array.isArray(parsedData.access) ||
       typeof parsedData.resetPassword !== "boolean"
     ) {
-      console.error("Invalid user data:", parsedData);
+      console.error("Missing or invalid required User fields:", {
+        token: typeof parsedData.token,
+        name: typeof parsedData.name,
+        identity: typeof parsedData.identity,
+        permissions: Array.isArray(parsedData.permissions),
+        access: Array.isArray(parsedData.access),
+        resetPassword: typeof parsedData.resetPassword,
+      });
       return undefined;
     }
 
+    // Support both 'permissions' and 'access' field names
+    const access = parsedData.access || parsedData.permissions;
+
+    // Create and return the User instance
     const args = {
-      profile: profile!,
+      profile: profile,
       token: parsedData.token,
-      access: parsedData.access,
+      access: access,
       resetPassword: parsedData.resetPassword,
       name: parsedData.name,
       identity: parsedData.identity,

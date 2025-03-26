@@ -147,12 +147,12 @@ export class MobileContactInfo extends BaseContactInfo {
     // checks if TZPhoneNumber exists and is valid
     let phone_number: TZPhoneNumber | undefined = undefined;
 
-    if (typeof mobileContactInfo.TZPhoneNumber === "string") {
-      phone_number = TZPhoneNumber.from(mobileContactInfo.TZPhoneNumber);
+    if (typeof mobileContactInfo.phoneNumber === "string") {
+      phone_number = TZPhoneNumber.from(mobileContactInfo.phoneNumber);
     }
 
-    if (typeof mobileContactInfo.TZPhoneNumber === "object") {
-      const obj = mobileContactInfo.TZPhoneNumber;
+    if (typeof mobileContactInfo.phoneNumber === "object") {
+      const obj = mobileContactInfo.phoneNumber;
       const isValidPhone = TZPhoneNumber.is(obj);
       if (isValidPhone) {
         phone_number = obj;

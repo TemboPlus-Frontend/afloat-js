@@ -73,14 +73,4 @@ export class AuthRepository extends BaseRepository<typeof authContract> {
       statusCode: 502,
     });
   }
-
-  async getAccessList(token: string): Promise<string[]> {
-    const result = await this.client.access({ headers: { token: token } });
-    if (result.status === 200) return result.body;
-
-    throw new APIError({
-      message: "An error occurred while trying to get access list",
-      statusCode: 502,
-    });
-  }
 }

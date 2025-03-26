@@ -7,12 +7,12 @@ import { PhoneNumber } from "@temboplus/frontend-core";
  */
 type ProfileZodSchemaType = z.ZodObject<{
   id: z.ZodString;
-  firstName: z.ZodString;
-  lastName: z.ZodString;
+  firstName: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+  lastName: z.ZodNullable<z.ZodOptional<z.ZodString>>;
   displayName: z.ZodString;
-  phone: z.ZodString;
+  phone: z.ZodNullable<z.ZodOptional<z.ZodString>>;
   accountNo: z.ZodString;
-  email: z.ZodString;
+  email: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }>;
 
 /**
@@ -22,22 +22,28 @@ type ProfileZodSchemaType = z.ZodObject<{
  * @const {ProfileType}
  *
  * @property {string} id - Unique identifier for the profile
- * @property {string} firstName - User's first name
- * @property {string} lastName - User's last name
+ * @property {string | null | undefined} firstName - User's first name, can be null or undefined
+ * @property {string | null | undefined} lastName - User's last name, can be null or undefined
  * @property {string} displayName - User's display name
- * @property {string} phone - User's contact phone number
+ * @property {string | null | undefined} phone - User's contact phone number, can be null or undefined
  * @property {string} accountNo - User's account number
- * @property {string} email - User's email address
+ * @property {string | null | undefined} email - User's email address, can be null or undefined
  */
-const profileSchema: ProfileZodSchemaType = z.object({
+export const profileSchema: ProfileZodSchemaType = z.object({
   id: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
+  firstName: z.string().optional().nullable(),
+  lastName: z.string().optional().nullable(),
   displayName: z.string(),
-  phone: z.string(),
+  phone: z.string().optional().nullable(),
   accountNo: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().email().optional().nullable(),
 });
+
+/**
+ * TypeScript type representing a validated user profile.
+ * Use this type for profile instances that have been validated against the schema.
+ */
+export type ProfileType = z.infer<typeof profileSchema>;
 
 /**
  * Represents a user profile in the system.
@@ -49,17 +55,17 @@ export class Profile {
   /** Unique identifier for the profile */
   private _id: string;
   /** User's first name */
-  private _firstName: string;
+  private _firstName?: string | null;
   /** User's last name */
-  private _lastName: string;
+  private _lastName?: string | null;
   /** User's display name, can be used for presentation */
   private _displayName: string;
   /** User's phone number, stored as a PhoneNumber object */
-  private _phone: PhoneNumber;
+  private _phone?: PhoneNumber | null;
   /** User's account number */
   private _accountNo: string;
   /** User's email address */
-  private _email: string;
+  private _email?: string | null;
 
   /**
    * Gets the profile schema used for validation.
@@ -71,16 +77,18 @@ export class Profile {
   /**
    * Creates a new Profile instance with the provided data.
    *
-   * @param data - Object containing profile information.
+   * Private constructor to enforce use of static factory methods.
+   *
+   * @param data - Object containing profile information
    */
   private constructor(data: {
     id: string;
-    firstName: string;
-    lastName: string;
+    firstName?: string | null;
+    lastName?: string | null;
     displayName: string;
-    phone: PhoneNumber;
+    phone?: PhoneNumber | null;
     accountNo: string;
-    email: string;
+    email?: string | null;
   }) {
     this._id = data.id;
     this._firstName = data.firstName;
@@ -89,6 +97,43 @@ export class Profile {
     this._phone = data.phone;
     this._accountNo = data.accountNo;
     this._email = data.email;
+  }
+
+  /**
+   * Creates a new Profile instance with the provided data.
+   *
+   * @param data - Object containing profile information.
+   */
+  static create(data: {
+    id: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    displayName: string;
+    phone?: string | null;
+    accountNo: string;
+    email?: string | null;
+  }): Profile | undefined {
+    let phoneObj: PhoneNumber | null | undefined = undefined;
+
+    if (data.phone !== undefined && data.phone !== null) {
+      phoneObj = PhoneNumber.from(data.phone);
+      if (!phoneObj) {
+        console.error("Failed to parse phone number:", data.phone);
+        return undefined;
+      }
+    } else {
+      phoneObj = data.phone; // Preserve null or undefined
+    }
+
+    return new Profile({
+      id: data.id,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      displayName: data.displayName,
+      phone: phoneObj,
+      accountNo: data.accountNo,
+      email: data.email,
+    });
   }
 
   /**
@@ -101,14 +146,14 @@ export class Profile {
   /**
    * Gets the user's first name.
    */
-  get firstName(): string {
+  get firstName(): string | null | undefined {
     return this._firstName;
   }
 
   /**
    * Gets the user's last name.
    */
-  get lastName(): string {
+  get lastName(): string | null | undefined {
     return this._lastName;
   }
 
@@ -122,7 +167,7 @@ export class Profile {
   /**
    * Gets the user's phone number object.
    */
-  get phone(): PhoneNumber {
+  get phone(): PhoneNumber | null | undefined {
     return this._phone;
   }
 
@@ -136,15 +181,18 @@ export class Profile {
   /**
    * Gets the user's email address.
    */
-  get email(): string {
+  get email(): string | null | undefined {
     return this._email;
   }
 
   /**
    * Gets the user's formatted phone number in international format.
    */
-  get formattedPhone(): string {
-    return this._phone.label;
+  get formattedPhone(): string | null | undefined {
+    if (this._phone === undefined) {
+      return undefined;
+    }
+    return this._phone?.label ?? null;
   }
 
   /**
@@ -156,7 +204,10 @@ export class Profile {
       return this._displayName;
     }
 
-    return `${this._firstName} ${this._lastName}`.trim();
+    const firstName = this._firstName ?? "";
+    const lastName = this._lastName ?? "";
+
+    return `${firstName} ${lastName}`.trim();
   }
 
   /**
@@ -164,13 +215,19 @@ export class Profile {
    *
    * @returns A plain object matching the ProfileType interface
    */
-  toObject(): z.infer<typeof profileSchema> {
+  toObject(): ProfileType {
+    // Handle the phone specially to ensure we preserve undefined vs null
+    let phoneString: string | null | undefined = undefined;
+    if (this._phone !== undefined) {
+      phoneString = this._phone?.label ?? null;
+    }
+
     return {
       id: this._id,
       firstName: this._firstName,
       lastName: this._lastName,
       displayName: this._displayName,
-      phone: this._phone.label,
+      phone: phoneString,
       accountNo: this._accountNo,
       email: this._email,
     };
@@ -223,28 +280,29 @@ export class Profile {
    * @returns A new Profile instance, or undefined if parsing failed
    */
   // deno-lint-ignore no-explicit-any
-  static from(data: Record<string, any>): Profile | undefined {
+  static from(data: any): Profile | undefined {
     try {
-      if (
-        !data.id || !data.firstName || !data.lastName || !data.phone ||
-        !data.email || !data.accountNo
-      ) {
+      if (!data) {
+        console.error("Data is null or undefined");
+        return undefined;
+      }
+
+      if (typeof data !== "object") {
+        console.error("Data is not an object");
+        return undefined;
+      }
+
+      if (!data.id || !data.accountNo || !data.displayName) {
         console.error("Missing required profile fields");
         return undefined;
       }
 
-      const phoneObj = PhoneNumber.from(data.phone);
-      if (!phoneObj) {
-        console.error("Failed to parse phone number:", data.phone);
-        return undefined;
-      }
-
-      return new Profile({
+      return Profile.create({
         id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
-        displayName: data.displayName || "",
-        phone: phoneObj,
+        displayName: data.displayName,
+        phone: data.phone,
         accountNo: data.accountNo,
         email: data.email,
       });
@@ -265,19 +323,47 @@ export class Profile {
 
     const maybeProfile = obj as Record<string, unknown>;
 
+    // Check required properties
     if (
       typeof maybeProfile._id !== "string" ||
-      typeof maybeProfile._firstName !== "string" ||
-      typeof maybeProfile._lastName !== "string" ||
       typeof maybeProfile._displayName !== "string" ||
-      typeof maybeProfile._accountNo !== "string" ||
+      typeof maybeProfile._accountNo !== "string"
+    ) {
+      return false;
+    }
+
+    // Check nullable/optional properties have the right type when present
+    if (
+      maybeProfile._firstName !== null &&
+      maybeProfile._firstName !== undefined &&
+      typeof maybeProfile._firstName !== "string"
+    ) {
+      return false;
+    }
+
+    if (
+      maybeProfile._lastName !== null &&
+      maybeProfile._lastName !== undefined &&
+      typeof maybeProfile._lastName !== "string"
+    ) {
+      return false;
+    }
+
+    if (
+      maybeProfile._email !== null &&
+      maybeProfile._email !== undefined &&
       typeof maybeProfile._email !== "string"
     ) {
       return false;
     }
 
+    // Check phone number
     const phone = maybeProfile._phone;
-    if (!phone || !PhoneNumber.is(phone as unknown)) {
+    if (
+      phone !== null &&
+      phone !== undefined &&
+      !PhoneNumber.is(phone as unknown)
+    ) {
       return false;
     }
 

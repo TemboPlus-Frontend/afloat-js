@@ -89,7 +89,7 @@ export class AfloatAuth {
 
     try {
       // Fetch and construct user data
-      const user = await tokenHandler.constructUser();
+      const user = await tokenHandler.constructUser(token);
       store.setUser(user);
 
       // Create and initialize auth instance
