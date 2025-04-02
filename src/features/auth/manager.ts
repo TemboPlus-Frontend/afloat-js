@@ -9,6 +9,7 @@ import {
 import { ClientTokenHandler } from "@features/auth/storage/client_token_handler.ts";
 import { ServerStore } from "@features/auth/storage/server_store.ts";
 import { ServerTokenHandler } from "@features/auth/storage/server_token_handler.ts";
+import { WalletSessionManager } from "../wallet/manager.session.ts";
 
 /**
  * Global context to hold the current auth instance reference.
@@ -33,7 +34,7 @@ export class AfloatAuth {
 
   /** client AfloatAuth instance */
   private static _instance: AfloatAuth | null = null;
-  
+
   /**
    * Private constructor to maintain control over instantiation.
    * @param {AuthStore} store - The auth store implementation to use
@@ -61,13 +62,13 @@ export class AfloatAuth {
     if (!AfloatAuth._instance) {
       AfloatAuth._instance = new AfloatAuth(
         createClientStore(),
-        ClientTokenHandler.instance
+        ClientTokenHandler.instance,
       );
-      
+
       // Set as current instance for global access
       AuthContext.current = AfloatAuth._instance;
     }
-    
+
     return AfloatAuth._instance;
   }
 
@@ -94,10 +95,10 @@ export class AfloatAuth {
 
       // Create and initialize auth instance
       const auth = new AfloatAuth(store, tokenHandler);
-      
+
       // Set as current instance for global access
       AuthContext.current = auth;
-      
+
       return auth;
     } catch (error) {
       if (error instanceof Error) {
@@ -164,6 +165,10 @@ export class AfloatAuth {
     this.clearSavedData();
     this.store.setUser(user);
     this.tokenHandler.setUserToken(user.token);
+
+    // Initialize wallet manager after successful login
+    await WalletSessionManager.instance.initialize();
+
     return user;
   }
 
@@ -194,5 +199,6 @@ export class AfloatAuth {
   private clearSavedData(): void {
     this.store.refresh();
     this.tokenHandler.clearToken();
+    WalletSessionManager.instance.reset();
   }
 }

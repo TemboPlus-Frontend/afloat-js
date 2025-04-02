@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { initContract } from "@ts-rest/core";
-import { WalletSchemas } from "@models/wallet/index.ts";
+import { Wallet, WalletStatementEntry } from "@models/index.ts";
 
 export const contract = initContract().router({
   getWallets: {
     method: "GET",
     path: "/",
     responses: {
-      200: z.array(WalletSchemas.wallet),
+      200: z.array(Wallet.schema),
     },
   },
   getBalance: {
@@ -30,7 +30,7 @@ export const contract = initContract().router({
       accountNo: z.string().optional(),
     }),
     responses: {
-      201: z.array(WalletSchemas.statementEntry),
+      201: z.array(WalletStatementEntry.schema),
     },
   },
 });

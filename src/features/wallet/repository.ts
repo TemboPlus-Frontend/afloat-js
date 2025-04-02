@@ -1,16 +1,14 @@
 import { BaseRepository } from "@shared/base_repository.ts";
 import { contract } from "@features/wallet/contract.ts";
-import type {
-  Wallet,
-  WalletStatementItem,
-} from "@models/wallet/index.ts";
+import { Wallet, WalletStatementEntry } from "@models/wallet/index.ts";
 import type { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { PermissionError } from "@errors/index.ts";
 
 /**
  * Repository class for managing wallet operations including balance checking,
- * statement generation, and wallet information retrieval.
+ * statement generation, and wallet information retrieval. Uses Wallet and
+ * WalletStatementEntry classes for data representation.
  * @extends {BaseRepository<typeof contract>}
  */
 export class WalletRepo extends BaseRepository<typeof contract> {
@@ -46,30 +44,50 @@ export class WalletRepo extends BaseRepository<typeof contract> {
 
     const result = await this.client.getBalance();
 
-    if (result.status === 201) {
-      return result.body.availableBalance;
+    // Assuming 200 or 201 indicates success based on original code
+    if (result.status === 200 || result.status === 201) {
+      // Type assertion might be needed depending on contract definition
+      return (result.body as { availableBalance: number }).availableBalance;
     }
 
-    throw new Error("An error occured while fetching balance");
+    // Consider more specific error handling based on status codes
+    throw new Error(`Failed to fetch balance. Status: ${result.status}`);
   }
 
   /**
-   * Retrieves all wallets associated with the current context.
-   * @throws {Error} If the wallet fetch operation fails
-   * @returns {Promise<Wallet[]>} Array of wallet objects
+   * Retrieves all wallets associated with the current context as Wallet class instances.
+   * @throws {Error} If the wallet fetch operation fails or data is invalid.
+   * @returns {Promise<Wallet[]>} Array of validated Wallet instances.
    */
   async getWallets(): Promise<Wallet[]> {
     const result = await this.client.getWallets();
 
     if (result.status === 200) {
-      return result.body;
+      const rawWallets = result.body
+
+      // Map raw data to Wallet class instances, filtering out invalid entries
+      const walletInstances = rawWallets.reduce((acc: Wallet[], data) => {
+        const instance = Wallet.from(data); // Attempt to create instance (includes validation)
+        if (instance) {
+          acc.push(instance);
+        } else {
+          console.warn(
+            "[WalletRepo] Received invalid wallet data from API, skipping item:",
+            data,
+          );
+        }
+        return acc;
+      }, []);
+
+      return walletInstances;
     }
 
-    throw new Error("An error occured while fetching wallets");
+    throw new Error(`Failed to fetch wallets. Status: ${result.status}`);
   }
 
   /**
-   * Retrieves wallet statement items for a specified date range and account.
+   * Retrieves wallet statement items as WalletStatementEntry class instances
+   * for a specified date range and account.
    * If no range is provided, defaults to the current month (1st to 30th).
    * @param {Object} props - The statement request properties
    * @param {Object} [props.range] - Optional date range for the statement
@@ -77,15 +95,15 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @param {Date} props.range.endDate - End date for the statement period
    * @param {string} [props.accountNo] - Optional account number to fetch statement for
    * @throws {PermissionError} If user lacks the ViewStatement permission
-   * @throws {Error} If the statement fetch operation fails
-   * @returns {Promise<WalletStatementItem[]>} Array of statement items for the specified period
+   * @throws {Error} If the statement fetch operation fails or data is invalid.
+   * @returns {Promise<WalletStatementEntry[]>} Array of validated WalletStatementEntry instances.
    */
   async getStatement(
     props: {
       range?: { startDate: Date; endDate: Date };
       accountNo?: string;
     },
-  ): Promise<WalletStatementItem[]> {
+  ): Promise<WalletStatementEntry[]> {
     const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewStatement;
 
@@ -96,20 +114,46 @@ export class WalletRepo extends BaseRepository<typeof contract> {
       });
     }
 
+    // Determine date range
     const now = new Date();
+    // Ensure start date is the actual beginning of the month
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth(), 30);
+    // Ensure end date is the actual end of the month (handles different month lengths)
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Day 0 of next month is last day of current
 
     const range = props.range !== undefined
       ? { startDate: props.range.startDate, endDate: props.range.endDate }
-      : { startDate: monthStart, endDate: monthEnd };
+      : { startDate: monthStart, endDate: monthEnd }; // Default range corrected
+
     const body = { ...range, accountNo: props.accountNo };
     const result = await this.client.getStatement({ body });
 
     if (result.status === 201) {
-      return result.body;
+      // Assuming result.body is an array of raw statement entry data objects
+      const rawEntries = result.body; // Use a more specific type if available e.g., RawStatementEntryData[]
+
+      // Map raw data to WalletStatementEntry class instances, filtering out invalid entries
+      const entryInstances = rawEntries.reduce(
+        (acc: WalletStatementEntry[], data) => {
+          const instance = WalletStatementEntry.from(data); // Attempt to create instance (includes validation)
+          if (instance) {
+            acc.push(instance);
+          } else {
+            // Optional: Log a warning for data that failed validation
+            console.warn(
+              "[WalletRepo] Received invalid statement entry data from API, skipping item:",
+              data,
+            );
+          }
+          return acc;
+        },
+        [],
+      );
+
+      return entryInstances;
     }
 
-    throw new Error("An error occured while fetching statement");
+    // Consider more specific error handling based on status codes
+    throw new Error(`Failed to fetch statement. Status: ${result.status}`);
   }
 }
