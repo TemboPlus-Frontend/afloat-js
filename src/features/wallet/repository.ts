@@ -67,7 +67,8 @@ export class WalletRepo extends BaseRepository<typeof contract> {
 
       // Map raw data to Wallet class instances, filtering out invalid entries
       const walletInstances = rawWallets.reduce((acc: Wallet[], data) => {
-        const instance = Wallet.from(data); // Attempt to create instance (includes validation)
+        const obj = Wallet.schema.parse(data)
+        const instance = Wallet.from(obj); // Attempt to create instance (includes validation)
         if (instance) {
           acc.push(instance);
         } else {

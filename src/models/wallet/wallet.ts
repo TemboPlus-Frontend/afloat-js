@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { type CountryCode, ISO2CountryCodesSet } from "@temboplus/frontend-core";
+import {
+  type CountryCode,
+  ISO2CountryCodesSet,
+} from "@temboplus/frontend-core";
 
 /**
  * Zod schema definition for validating Wallet data structures.
@@ -7,7 +10,7 @@ import { type CountryCode, ISO2CountryCodesSet } from "@temboplus/frontend-core"
  * of country codes against the imported ISO2CountryCodesSet.
  */
 const walletSchema = z.object({
-  id: z.string().uuid({ message: "Wallet ID must be a valid UUID." }),
+  id: z.string().min(1, { message: "Wallet ID is required." }),
   profileId: z.string().min(1, { message: "Profile ID is required." }),
   accountNo: z.string().min(1, { message: "Account number is required." }),
   accountName: z.string().min(1, { message: "Account name is required." }),
@@ -44,7 +47,7 @@ export class Wallet {
   private readonly _accountNo: string;
   private readonly _accountName: string;
   private readonly _channel: string;
-  private readonly _countryCode: CountryCode; 
+  private readonly _countryCode: CountryCode;
   private readonly _createdAt: string; // Stored as ISO 8601 string
   private readonly _updatedAt: string; // Stored as ISO 8601 string
 
@@ -121,7 +124,7 @@ export class Wallet {
   }
   get countryCode(): CountryCode {
     return this._countryCode;
-  } 
+  }
   get createdAt(): string {
     return this._createdAt;
   }

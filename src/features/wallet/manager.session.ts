@@ -58,7 +58,29 @@ const useWalletStore = create<WalletState>()(
 
       // --- Actions ---
       setWallets: (wallets: Wallet[]) => {
-        const validatedWallets = wallets.filter((w) => Wallet.is(w));
+        const sample1 = Wallet.from({
+          id: "2",
+          profileId: "fjfdkjfdkjfd",
+          accountNo: "87654321",
+          accountName: "Primary Account KES",
+          channel: "BANK",
+          countryCode: "KE",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
+        const sample2 = Wallet.from({
+          id: "4",
+          profileId: "ghjgjgdff",
+          accountNo: "45678901",
+          accountName: "Primary Account RWF",
+          channel: "BANK",
+          countryCode: "RW",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        const validatedWallets = [...wallets, sample1, sample2].filter((w) => Wallet.is(w));
+        console.log("1: ", validatedWallets)
 
         // --- Constraint Enforcement ---
         if (validatedWallets.length === 0) {
@@ -92,6 +114,7 @@ const useWalletStore = create<WalletState>()(
         } else {
           walletToSelect = validatedWallets[0];
         }
+        console.log("2: ", validatedWallets)
 
         // Set state and mark as initialized
         set({
@@ -407,7 +430,7 @@ export const WalletSessionHooks = {
  */
 export class WalletSessionManager {
   private repo: WalletRepo;
-  private static _instance: WalletSessionManager | undefined = undefined;
+  private static _instance: WalletSessionManager;
 
   /**
    * @private
@@ -421,10 +444,10 @@ export class WalletSessionManager {
    * @returns {WalletSessionManager} The singleton instance.
    */
   public static get instance(): WalletSessionManager {
-    if (!WalletSessionManager._instance) {
-      WalletSessionManager._instance = new WalletSessionManager();
+    if (!this._instance) {
+      this._instance = new WalletSessionManager();
     }
-    return WalletSessionManager._instance;
+    return this._instance;
   }
 
   /**
@@ -606,6 +629,7 @@ export class WalletSessionManager {
    * @throws {Error} If wallet with given ID is not found or if called before initialization.
    */
   public changeWallet(walletId: string): void {
+    console.log(typeof this);
     if (!this.isInitialized()) {
       throw new Error("Cannot change wallet: Wallet session not initialized.");
     }
@@ -628,6 +652,7 @@ export class WalletSessionManager {
    * @throws {Error} If no wallets found for the country code or if called before initialization.
    */
   public changeCountry(countryCode: CountryCode): void {
+    console.log(typeof this);
     if (!this.isInitialized()) {
       throw new Error("Cannot change country: Wallet session not initialized.");
     }
