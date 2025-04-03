@@ -15,6 +15,11 @@ import {
 export function isWalletStatementItemArray(
   data: unknown,
 ): data is WalletStatementItem[] {
-  const result = z.array(WalletSchemas.statementEntry).safeParse(data);
-  return result.success;
+  try {
+    z.array(WalletSchemas.statementEntry).parse(data);
+    return true;
+  } catch (error) {
+    console.log("isWalletStatementItemArray?: false. Why?: ", error);
+    return false;
+  }
 }

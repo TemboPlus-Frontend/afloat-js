@@ -1,4 +1,4 @@
-import type { TZPhoneNumber } from "@temboplus/frontend-core"
+import { NetworkOperator, type TZPhoneNumber } from "@temboplus/frontend-core";
 
 /**
  * Represents the available channels through which payouts can be processed.
@@ -61,6 +61,11 @@ export const createPayoutChannelCode = {
    *
    * @see {@link TZPhoneNumber} from "@jsr/temboplus__tembo-core" for phone number structure
    */
-  mobile: (phoneNumber: TZPhoneNumber): PayoutChannelCode =>
-    `TZ-${phoneNumber.networkOperator.id.toString().toUpperCase()}-B2C` as PayoutChannelCode,
+  mobile: function (phoneNumber: TZPhoneNumber): PayoutChannelCode {
+    //! fix: Channeling all Vodacom numbers to Tigo. Request from Mr. Tesha to solve some specific problem
+    if (phoneNumber.networkOperator.id === NetworkOperator.VODACOM) {
+      return `TZ-${NetworkOperator.TIGO.toString().toUpperCase()}-B2C` as PayoutChannelCode;
+    }
+    return `TZ-${phoneNumber.networkOperator.id.toString().toUpperCase()}-B2C` as PayoutChannelCode;
+  },
 };

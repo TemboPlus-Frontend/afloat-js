@@ -4,6 +4,8 @@
  * @readonly
  */
 export enum PAYOUT_STATUS {
+  QUEUED = "QUEUED",
+
   /** Payout is awaiting processing */
   PENDING = "PENDING",
   /** Payout has been successfully processed */

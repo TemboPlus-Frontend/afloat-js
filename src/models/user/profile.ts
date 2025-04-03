@@ -116,7 +116,9 @@ export class Profile {
     let phoneObj: PhoneNumber | null | undefined = undefined;
 
     if (data.phone !== undefined && data.phone !== null) {
-      phoneObj = PhoneNumber.from(data.phone);
+      let phoneString = data.phone ?? "";
+      if (!phoneString.startsWith("+")) phoneString = "+" + phoneString;
+      phoneObj = PhoneNumber.from(phoneString);
       if (!phoneObj) {
         console.error("Failed to parse phone number:", data.phone);
         return undefined;

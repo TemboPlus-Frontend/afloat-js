@@ -1,21 +1,11 @@
 import { z } from "zod";
 
 /**
- * Helper function to make a field optional with undefined
- * Transforms null values to undefined for consistency
- * @param schema - The Zod schema to make optional
- * @returns A schema that only allows string or undefined (no null)
- */
-const makeOptional = <T extends z.ZodType>(schema: T) =>
-  schema.optional().transform((val) => val ?? undefined);
-
-/**
  * Type definition for statement entry schema using Zod.
  * This is used as a TypeScript type helper for the actual schema implementation.
  */
 type _StatementEntryType = z.ZodObject<{
-  accountNo: z.ZodEffects<z.ZodOptional<z.ZodString>>;
-  cbaRefNo: z.ZodEffects<z.ZodOptional<z.ZodString>>;
+  accountNo: z.ZodString;
   debitOrCredit: z.ZodString;
   tranRefNo: z.ZodString;
   narration: z.ZodString;
@@ -30,8 +20,7 @@ type _StatementEntryType = z.ZodObject<{
  * Schema definition for a statement entry.
  * Represents a single transaction in a wallet's statement history.
  *
- * @property {string} accountNo - The account number associated with the transaction (optional)
- * @property {string} cbaRefNo - Core banking system reference number (optional)
+ * @property {string} accountNo - The account number associated with the transaction
  * @property {string} debitOrCredit - Indicator if transaction is debit or credit
  * @property {string} tranRefNo - Transaction reference number
  * @property {string} narration - Description of the transaction
@@ -42,8 +31,7 @@ type _StatementEntryType = z.ZodObject<{
  * @property {number} balance - Running balance after transaction
  */
 const statementEntrySchema: _StatementEntryType = z.object({
-  accountNo: makeOptional(z.string()),
-  cbaRefNo: makeOptional(z.string()),
+  accountNo: z.string(),
   debitOrCredit: z.string().min(1, "Transaction type is required"),
   tranRefNo: z.string().min(1, "Transaction reference is required"),
   narration: z.string().min(1, "Transaction description is required"),
@@ -81,7 +69,7 @@ type _WalletType = z.ZodObject<{
  * @property {string} updatedAt - ISO datetime string of last wallet update
  */
 const walletSchema: _WalletType = z.object({
-  id: z.string().uuid("Invalid wallet ID format"),
+  id: z.string().min(1),
   profileId: z.string().min(1, "Profile ID is required"),
   accountNo: z.string().min(1, "Account number is required"),
   accountName: z.string().min(1, "Account name is required"),
