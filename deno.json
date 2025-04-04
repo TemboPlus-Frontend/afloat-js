@@ -1,6 +1,6 @@
 {
     "name": "@temboplus/afloat",
-    "version": "0.1.31",
+    "version": "0.1.32",
     "license": "MIT",
     "exports": "./mod.ts",
     "tasks": {
@@ -14,7 +14,7 @@
         "@shared/": "./src/shared/",
         "@errors/": "./src/errors/",
         "@features/": "./src/features/",
-        "@temboplus/frontend-core": "npm:@temboplus/frontend-core@^0.2.4",
+        "@temboplus/frontend-core": "npm:@temboplus/frontend-core@^0.2.9",
         "@ts-rest/core": "npm:@ts-rest/core@^3.52.1",
         "antd": "npm:antd@^5.24.5",
         "uuid": "npm:uuid@^11.1.0",
