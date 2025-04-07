@@ -2,7 +2,7 @@ import { assertEquals } from "jsr:@std/assert";
 import {
   BankContactInfo,
   MobileContactInfo,
-} from "@models/contact/derivatives/contact_info.ts";
+} from "../../src/models/contact/contact_info.ts";
 import { Bank, TZPhoneNumber } from "@temboplus/frontend-core";
 
 Deno.test("MobileContactInfo.is", async (t) => {

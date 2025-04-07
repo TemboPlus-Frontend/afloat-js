@@ -848,7 +848,6 @@
       "jsr:@deno/dnt@~0.41.3",
       "npm:@temboplus/frontend-core@~0.2.8",
       "npm:@ts-rest/core@^3.52.1",
-      "npm:antd@^5.24.5",
       "npm:uuid@^11.1.0",
       "npm:zod@^3.24.2",
       "npm:zustand@^5.0.3"

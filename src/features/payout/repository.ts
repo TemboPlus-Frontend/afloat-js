@@ -8,7 +8,7 @@ import {
 import type { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { APIError, PermissionError } from "@errors/index.ts";
-import { Payout } from "@models/payout/derivatives/payout.ts";
+import { Payout } from "../../models/payout/payout.ts";
 
 /**
  * Repository class for managing payout operations including creation, approval,

@@ -8,7 +8,7 @@ import { Bank, TZPhoneNumber } from "@temboplus/frontend-core";
 import {
   BankContactInfo,
   type ContactInfo,
-} from "@models/contact/derivatives/contact_info.ts";
+} from "./contact_info.ts";
 
 /**
  * Contact class that wraps the Zod schema and provides additional functionality
