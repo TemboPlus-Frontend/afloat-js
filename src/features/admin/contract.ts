@@ -10,13 +10,16 @@ export const userManagementContract = c.router({
   getUsers: {
     method: "GET",
     path: "/login",
+    query: z.object({
+      eager: z.string(),
+    }),
     responses: {
       200: z.array(UserManagementSchemas.managedUser),
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "List all user accounts",
@@ -30,16 +33,19 @@ export const userManagementContract = c.router({
     pathParams: z.object({
       id: z.string(),
     }),
+    query: z.object({
+      eager: z.string(),
+    }),
     responses: {
       200: UserManagementSchemas.managedUser,
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       404: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "Get user account details",
@@ -54,17 +60,17 @@ export const userManagementContract = c.router({
     responses: {
       201: UserManagementSchemas.createUserResponse,
       400: z.object({
-        message: z.string(),
+        message: z.string().optional(),
         errors: z.array(z.string()).optional(),
       }),
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       409: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "Create new user account",
@@ -83,17 +89,17 @@ export const userManagementContract = c.router({
     responses: {
       200: UserManagementSchemas.managedUser,
       400: z.object({
-        message: z.string(),
+        message: z.string().optional(),
         errors: z.array(z.string()).optional(),
       }),
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       404: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "Update user account",
@@ -103,25 +109,54 @@ export const userManagementContract = c.router({
 
   // Archive user (soft delete)
   archiveUser: {
-    method: "DELETE",
-    path: "/login/:id",
+    method: "POST",
+    path: "/login/:id/archive",
     pathParams: z.object({
       id: z.string(),
     }),
+    body: z.object({}),
     responses: {
-      200: UserManagementSchemas.managedUser,
+      200: z.object({
+        isArchived: z.boolean(),
+      }),
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       404: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "Archive user account",
     description: "Archive (soft delete) a user account",
+  },
+
+  // Archive user (soft delete)
+  unarchiveUser: {
+    method: "POST",
+    path: "/login/:id/unarchive",
+    pathParams: z.object({
+      id: z.string(),
+    }),
+    body: z.object({}),
+    responses: {
+      200: z.object({
+        isArchived: z.boolean(),
+      }),
+      401: z.object({
+        message: z.string().optional(),
+      }),
+      403: z.object({
+        message: z.string().optional(),
+      }),
+      404: z.object({
+        message: z.string().optional(),
+      }),
+    },
+    summary: "Un-archive user account",
+    description: "Un-archive (soft delete) a user account",
   },
 
   // Reset user password
@@ -134,19 +169,19 @@ export const userManagementContract = c.router({
     body: UserManagementSchemas.resetPasswordRequest,
     responses: {
       200: z.object({
-        message: z.string(),
+        success: z.boolean(),
       }),
       400: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       404: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "Reset user password",
@@ -160,10 +195,10 @@ export const userManagementContract = c.router({
     responses: {
       200: z.array(UserManagementSchemas.role),
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "List all roles",
@@ -180,13 +215,13 @@ export const userManagementContract = c.router({
     responses: {
       200: UserManagementSchemas.role,
       401: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       403: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
       404: z.object({
-        message: z.string(),
+        message: z.string().optional(),
       }),
     },
     summary: "Get role details",

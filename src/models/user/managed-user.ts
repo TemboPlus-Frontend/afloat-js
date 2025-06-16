@@ -20,7 +20,7 @@ export class UserEntity {
   public readonly identity: string; // email or phone
   public readonly profileId: string;
   public readonly permissions: ReadonlySet<string>;
-  
+
   constructor(data: UserEntityData) {
     this.id = data.id;
     this.name = data.name;
@@ -40,14 +40,14 @@ export class UserEntity {
    * Check if user has any of the specified permissions
    */
   canAny(permissions: string[]): boolean {
-    return permissions.some(p => this.permissions.has(p));
+    return permissions.some((p) => this.permissions.has(p));
   }
 
   /**
    * Check if user has all of the specified permissions
    */
   canAll(permissions: string[]): boolean {
-    return permissions.every(p => this.permissions.has(p));
+    return permissions.every((p) => this.permissions.has(p));
   }
 }
 
@@ -57,7 +57,7 @@ export interface AuthenticatedUserData {
   name: string;
   identity: string;
   profileId: string;
-  profile: any; 
+  profile: any;
   token: string;
   resetPassword: boolean;
   permissions: string[];
@@ -76,7 +76,7 @@ export interface ManagedUserData {
   roleId: string;
   resetPassword: boolean;
   isActive: boolean;
-  role: RoleData;
+  role?: RoleData;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,7 +90,7 @@ export class ManagedUser extends UserEntity {
   public readonly roleId: string;
   public readonly resetPassword: boolean;
   public readonly isActive: boolean;
-  public readonly role: Role;
+  public readonly role?: Role;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
@@ -100,16 +100,23 @@ export class ManagedUser extends UserEntity {
       name: data.name,
       identity: data.identity,
       profileId: data.profileId,
-      permissions: data.role.access,
+      permissions: data.role?.access ?? [],
     });
-    
+
     this.type = data.type;
     this.roleId = data.roleId;
     this.resetPassword = data.resetPassword;
     this.isActive = data.isActive;
-    this.role = new Role(data.role);
     this.createdAt = new Date(data.createdAt);
     this.updatedAt = new Date(data.updatedAt);
+
+    if (data.role) {
+      try {
+        this.role = new Role(data.role);
+      } catch (_) {
+        //
+      }
+    }
   }
 
   /**
@@ -130,34 +137,34 @@ export class ManagedUser extends UserEntity {
    * Get comprehensive account status
    */
   getAccountStatus(): {
-    status: 'active' | 'inactive' | 'password_reset_required';
+    status: "active" | "inactive" | "password_reset_required";
     label: string;
-    color: 'success' | 'warning' | 'error';
+    color: "success" | "warning" | "error";
     description: string;
   } {
     if (!this.isActive) {
       return {
-        status: 'inactive',
-        label: 'Inactive',
-        color: 'error',
-        description: 'Account has been deactivated by an administrator'
+        status: "inactive",
+        label: "Inactive",
+        color: "error",
+        description: "Account has been deactivated by an administrator",
       };
     }
-    
+
     if (this.resetPassword) {
       return {
-        status: 'password_reset_required',
-        label: 'Password Reset Required',
-        color: 'warning',
-        description: 'User must reset their password on next login'
+        status: "password_reset_required",
+        label: "Password Reset Required",
+        color: "warning",
+        description: "User must reset their password on next login",
       };
     }
 
     return {
-      status: 'active',
-      label: 'Active',
-      color: 'success',
-      description: 'Account is active and ready to use'
+      status: "active",
+      label: "Active",
+      color: "success",
+      description: "Account is active and ready to use",
     };
   }
 
@@ -165,7 +172,7 @@ export class ManagedUser extends UserEntity {
    * Get role display name
    */
   getRoleName(): string {
-    return this.role.name;
+    return this.role?.name ?? "";
   }
 
   /**
@@ -182,9 +189,9 @@ export class ManagedUser extends UserEntity {
     const now = new Date();
     const diffMs = now.getTime() - this.updatedAt.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
     return this.updatedAt.toLocaleDateString();
@@ -192,7 +199,7 @@ export class ManagedUser extends UserEntity {
 
   static from(data: any): ManagedUser | undefined {
     try {
-      if (!data?.id || !data?.name || !data?.identity || !data?.role) {
+      if (!data?.id || !data?.name || !data?.identity || !data?.roleId) {
         console.error("Missing required ManagedUser fields:", data);
         return undefined;
       }
@@ -204,7 +211,9 @@ export class ManagedUser extends UserEntity {
   }
 
   static createMany(dataArray: any[]): ManagedUser[] {
-    return dataArray.map(data => ManagedUser.from(data)).filter(Boolean) as ManagedUser[];
+    return dataArray.map((data) => ManagedUser.from(data)).filter(
+      Boolean,
+    ) as ManagedUser[];
   }
 
   toJSON(): any {
@@ -217,7 +226,7 @@ export class ManagedUser extends UserEntity {
       roleId: this.roleId,
       resetPassword: this.resetPassword,
       isActive: this.isActive,
-      role: this.role.toJSON(),
+      role: this.role?.toJSON(),
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
     };

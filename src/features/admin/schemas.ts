@@ -101,7 +101,7 @@ type _ManagedUserType = z.ZodObject<{
 type _CreateUserRequestType = z.ZodObject<{
   name: z.ZodString;
   identity: z.ZodString;
-  password: _PasswordType;
+  password: z.ZodOptional<_PasswordType>;
   roleId: z.ZodOptional<z.ZodString>;
   resetPassword: z.ZodOptional<z.ZodBoolean>;
 }>;
@@ -207,7 +207,7 @@ const managedUserSchema: _ManagedUserType = z.object({
 const createUserRequestSchema: _CreateUserRequestType = z.object({
   name: z.string().min(1, "User name is required"),
   identity: z.string().email("Valid email address is required"),
-  password: passwordSchema,
+  password: passwordSchema.optional(),
   roleId: z.string().optional(),
   resetPassword: z.boolean().optional(),
 });

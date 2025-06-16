@@ -7,7 +7,11 @@ import type {
   UpdateUserRequest,
 } from "@features/admin/schemas.ts";
 import type { AfloatAuth } from "@features/auth/manager.ts";
-import { ManagedUser, type ManagedUserData, Permissions } from "@models/index.ts";
+import {
+  ManagedUser,
+  type ManagedUserData,
+  Permissions,
+} from "@models/index.ts";
 import { PermissionError } from "@errors/index.ts";
 import { Role, type RoleData } from "@models/role.ts";
 
@@ -84,11 +88,11 @@ export class UserManagementRepository
   /**
    * Archives (soft deletes) a user account by ID.
    * @param {string} id - The unique identifier of the user account to archive.
-   * @returns {Promise<ManagedUser>} A promise that resolves to the archived user account.
+   * @returns {Promise<{ isArchived: boolean }>} A promise that resolves to whether isArchived.
    * @throws {PermissionError} If the user lacks required permissions
    * @throws {APIError} If the response status code is not 200.
    */
-  async archiveUser(id: string): Promise<ManagedUser> {
+  async archiveUser(id: string): Promise<{ isArchived: boolean }> {
     const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.UserManagement.ArchiveUser;
 
@@ -100,12 +104,29 @@ export class UserManagementRepository
     }
 
     const result = await this.client.archiveUser({ params: { id } });
-    const data = this.handleResponse<ManagedUserData>(result, 200);
-    const managedUser = ManagedUser.from(data);
-    if (!managedUser) {
-      throw new Error("Invalid user data received from server");
+    return this.handleResponse<{ isArchived: boolean }>(result, 200);
+  }
+
+  /**
+   * Archives (soft deletes) a user account by ID.
+   * @param {string} id - The unique identifier of the user account to archive.
+   * @returns {Promise<{ isArchived: boolean }>} A promise that resolves to whether isArchived.
+   * @throws {PermissionError} If the user lacks required permissions
+   * @throws {APIError} If the response status code is not 200.
+   */
+  async unArchiveUser(id: string): Promise<{ isArchived: boolean }> {
+    const auth = this.getAuthForPermissionCheck();
+    const requiredPerm = Permissions.UserManagement.ArchiveUser;
+
+    if (!auth.checkPermission(requiredPerm)) {
+      throw new PermissionError({
+        message: "You are not authorized to un-archive user accounts.",
+        requiredPermissions: [requiredPerm],
+      });
     }
-    return managedUser;
+
+    const result = await this.client.unarchiveUser({ params: { id } });
+    return this.handleResponse<{ isArchived: boolean }>(result, 200);
   }
 
   /**
@@ -119,7 +140,7 @@ export class UserManagementRepository
   async resetUserPassword(
     id: string,
     input: ResetPasswordRequest = {},
-  ): Promise<void> {
+  ): Promise<{ success: boolean }> {
     const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.UserManagement.ResetPassword;
 
@@ -134,7 +155,7 @@ export class UserManagementRepository
       params: { id },
       body: input,
     });
-    this.handleResponse<{ message: string }>(result, 200);
+    return this.handleResponse<{ success: boolean }>(result, 200);
   }
 
   /**
@@ -159,7 +180,7 @@ export class UserManagementRepository
       });
     }
 
-    const result = await this.client.getUsers();
+    const result = await this.client.getUsers({ query: { eager: "role" } });
     const data = this.handleResponse<ManagedUserData[]>(result, 200);
     return ManagedUser.createMany(data);
   }
@@ -186,7 +207,10 @@ export class UserManagementRepository
       });
     }
 
-    const result = await this.client.getUser({ params: { id } });
+    const result = await this.client.getUser({
+      params: { id },
+      query: { eager: "role" },
+    });
     const data = this.handleResponse<ManagedUserData>(result, 200);
     const managedUser = ManagedUser.from(data);
     if (!managedUser) {

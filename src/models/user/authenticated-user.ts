@@ -66,19 +66,14 @@ export class User {
     this.name = name;
     this.identity = identity;
 
-    // Initialize the permissions map
     this.permissionsMap = {};
-    for (const permission of Object.values(Permissions)) {
-      if (typeof permission === "object") {
-        Object.values(permission).forEach((perm) => {
-          this.permissionsMap[perm] = access.includes(perm);
-        });
-      } else {
-        this.permissionsMap[permission] = access.includes(permission);
+    for (const group of Object.values(Permissions)) {
+      for (const perm of Object.values(group)) {
+        this.permissionsMap[perm] = access.includes(perm);
       }
     }
   }
-
+  
   /**
    * Checks if the user has a specific permission.
    *
