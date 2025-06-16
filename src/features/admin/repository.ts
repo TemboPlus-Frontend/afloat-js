@@ -207,7 +207,7 @@ export class UserManagementRepository
    */
   async getAllRoles(): Promise<Role[]> {
     const auth = this.getAuthForPermissionCheck();
-    const requiredPerm = Permissions.UserManagement.ViewRoles;
+    const requiredPerm = Permissions.Role.ViewRoles;
 
     if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({
@@ -240,7 +240,7 @@ export class UserManagementRepository
    */
   async getRole(id: string): Promise<Role> {
     const auth = this.getAuthForPermissionCheck();
-    const requiredPerm = Permissions.UserManagement.ViewRoles;
+    const requiredPerm = Permissions.Role.ViewRoles;
 
     if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({

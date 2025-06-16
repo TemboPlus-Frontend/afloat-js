@@ -34,15 +34,17 @@ export const Permissions = {
     ViewBalance: "wallet.getBalance",
     ViewStatement: "wallet.getStatement",
   },
+  Role: {
+    ViewRoles: "role.findAll",
+    ViewRole: "role.findById",
+  },
   UserManagement: {
-    ViewRoles: "userManagement.getRoles",
-    ViewUsers: "userManagement.getUsers",
-    ViewUser: "userManagement.getUser",
-    CreateUser: "userManagement.createUser",
-    UpdateUser: "userManagement.updateUser",
-    ArchiveUser: "userManagement.archiveUser",
-    ResetPassword: "userManagement.resetPassword",
-    ViewRole: "userManagement.getRole",
+    ViewUsers: "login.findAll",
+    ViewUser: "login.findById",
+    CreateUser: "login.create",
+    UpdateUser: "login.update",
+    ArchiveUser: "login.archive",
+    ResetPassword: "login.resetPassword",
   },
 } as const; // Make it deeply readonly
 
@@ -56,4 +58,5 @@ export type Permission =
   | typeof Permissions.Payout[keyof typeof Permissions.Payout]
   | typeof Permissions.Transfer[keyof typeof Permissions.Transfer]
   | typeof Permissions.UserManagement[keyof typeof Permissions.UserManagement]
+  | typeof Permissions.Role[keyof typeof Permissions.Role]
   | typeof Permissions.Wallet[keyof typeof Permissions.Wallet];
