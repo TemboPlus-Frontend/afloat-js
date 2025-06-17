@@ -89,7 +89,8 @@ type _ManagedUserType = z.ZodObject<{
   roleId: z.ZodString;
   resetPassword: z.ZodBoolean;
   isActive: z.ZodBoolean;
-  role: z.ZodType<Role>;
+  isArchived: z.ZodBoolean;
+  role: z.ZodOptional<z.ZodType<Role>>;
   createdAt: z.ZodString;
   updatedAt: z.ZodString;
 }>;
@@ -139,7 +140,30 @@ type _CreateUserResponseType = z.ZodObject<{
   profileId: z.ZodString;
   roleId: z.ZodString;
   isActive: z.ZodBoolean;
+  isArchived: z.ZodBoolean;
   createdAt: z.ZodString;
+}>;
+
+// ====================== Query Parameter Schema Type Definition ====================== //
+
+/**
+ * Type definition for managed user query parameters schema using Zod.
+ * This is used as a TypeScript type helper for the actual schema implementation.
+ */
+type _ManagedUserQueryParamsType = z.ZodObject<{
+  id: z.ZodOptional<z.ZodString>;
+  name: z.ZodOptional<z.ZodString>;
+  identity: z.ZodOptional<z.ZodString>;
+  type: z.ZodOptional<z.ZodString>;
+  profileId: z.ZodOptional<z.ZodString>;
+  roleId: z.ZodOptional<z.ZodString>;
+  resetPassword: z.ZodOptional<z.ZodNumber>;
+  isActive: z.ZodOptional<z.ZodNumber>;
+  isArchived: z.ZodOptional<z.ZodNumber>;
+  createdAt: z.ZodOptional<z.ZodString>;
+  updatedAt: z.ZodOptional<z.ZodString>;
+
+  eager: z.ZodOptional<z.ZodString>;
 }>;
 
 // ====================== Schema Definitions ====================== //
@@ -189,9 +213,43 @@ const managedUserSchema: _ManagedUserType = z.object({
   roleId: z.string().min(1, "Role ID is required"),
   resetPassword: z.boolean(),
   isActive: z.boolean(),
-  role: roleSchema,
+  isArchived: z.boolean(),
+  role: roleSchema.optional(),
   createdAt: z.string().datetime("Invalid creation timestamp"),
   updatedAt: z.string().datetime("Invalid update timestamp"),
+});
+
+/**
+ * Schema definition for managed user query parameters.
+ * Contains all primitive fields from ManagedUserData for filtering/searching users.
+ * Excludes complex object fields like 'role' which are not suitable for query parameters.
+ *
+ * @property {string} id - Optional filter by user ID
+ * @property {string} name - Optional filter by user name (partial match)
+ * @property {string} identity - Optional filter by user identity (email/phone)
+ * @property {string} type - Optional filter by user type
+ * @property {string} profileId - Optional filter by profile ID
+ * @property {string} roleId - Optional filter by role ID
+ * @property {number} resetPassword - Optional filter by password reset requirement
+ * @property {number} isActive - Optional filter by account active status
+ * @property {number} isArchived - Optional filter by account archived status
+ * @property {string} createdAt - Optional filter by creation date (ISO datetime)
+ * @property {string} updatedAt - Optional filter by last update date (ISO datetime)
+ */
+const managedUserQueryParamsSchema: _ManagedUserQueryParamsType = z.object({
+  id: z.string().min(1).optional(),
+  name: z.string().min(1).optional(),
+  identity: z.string().email("Invalid email address").optional(),
+  type: z.string().min(1).optional(),
+  profileId: z.string().min(1).optional(),
+  roleId: z.string().min(1).optional(),
+  resetPassword: z.number().optional(),
+  isActive: z.number().optional(),
+  isArchived: z.number().optional(),
+  createdAt: z.string().datetime("Invalid creation timestamp").optional(),
+  updatedAt: z.string().datetime("Invalid update timestamp").optional(),
+
+  eager: z.string().optional(),
 });
 
 /**
@@ -263,6 +321,7 @@ const createUserResponseSchema: _CreateUserResponseType = z.object({
   profileId: z.string(),
   roleId: z.string(),
   isActive: z.boolean(),
+  isArchived: z.boolean(),
   createdAt: z.string().datetime(),
 });
 
@@ -275,6 +334,7 @@ const createUserResponseSchema: _CreateUserResponseType = z.object({
 export const UserManagementSchemas = {
   role: roleSchema,
   managedUser: managedUserSchema,
+  managedUserQueryParams: managedUserQueryParamsSchema,
   createUserRequest: createUserRequestSchema,
   updateUserRequest: updateUserRequestSchema,
   resetPasswordRequest: resetPasswordRequestSchema,
@@ -320,4 +380,13 @@ export type ResetPasswordRequest = z.infer<
  */
 export type CreateUserResponse = z.infer<
   typeof UserManagementSchemas.createUserResponse
+>;
+
+/**
+ * TypeScript type for managed user query parameters.
+ * Use this type for query parameter objects that have been validated against the schema.
+ * All fields are optional to allow flexible filtering and searching.
+ */
+export type ManagedUserQueryParams = z.infer<
+  typeof UserManagementSchemas.managedUserQueryParams
 >;

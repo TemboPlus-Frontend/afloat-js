@@ -44,6 +44,7 @@ export const Permissions = {
     CreateUser: "login.create",
     UpdateUser: "login.update",
     ArchiveUser: "login.archive",
+    UnArchiveUser: "login.unarchive",
     ResetPassword: "login.resetPassword",
   },
 } as const; // Make it deeply readonly

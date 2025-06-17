@@ -10,9 +10,7 @@ export const userManagementContract = c.router({
   getUsers: {
     method: "GET",
     path: "/login",
-    query: z.object({
-      eager: z.string(),
-    }),
+    query: UserManagementSchemas.managedUserQueryParams,
     responses: {
       200: z.array(UserManagementSchemas.managedUser),
       401: z.object({
@@ -33,9 +31,7 @@ export const userManagementContract = c.router({
     pathParams: z.object({
       id: z.string(),
     }),
-    query: z.object({
-      eager: z.string(),
-    }),
+    query: UserManagementSchemas.managedUserQueryParams,
     responses: {
       200: UserManagementSchemas.managedUser,
       401: z.object({
@@ -116,9 +112,7 @@ export const userManagementContract = c.router({
     }),
     body: z.object({}),
     responses: {
-      200: z.object({
-        isArchived: z.boolean(),
-      }),
+      200: UserManagementSchemas.managedUser,
       401: z.object({
         message: z.string().optional(),
       }),
@@ -134,7 +128,7 @@ export const userManagementContract = c.router({
   },
 
   // Archive user (soft delete)
-  unarchiveUser: {
+  unArchiveUser: {
     method: "POST",
     path: "/login/:id/unarchive",
     pathParams: z.object({
@@ -142,9 +136,7 @@ export const userManagementContract = c.router({
     }),
     body: z.object({}),
     responses: {
-      200: z.object({
-        isArchived: z.boolean(),
-      }),
+      200: UserManagementSchemas.managedUser,
       401: z.object({
         message: z.string().optional(),
       }),

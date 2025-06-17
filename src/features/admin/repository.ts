@@ -3,6 +3,7 @@ import { userManagementContract } from "./contract.ts";
 import type {
   CreateUserRequest,
   CreateUserResponse,
+  ManagedUserQueryParams,
   ResetPasswordRequest,
   UpdateUserRequest,
 } from "@features/admin/schemas.ts";
@@ -88,45 +89,55 @@ export class UserManagementRepository
   /**
    * Archives (soft deletes) a user account by ID.
    * @param {string} id - The unique identifier of the user account to archive.
-   * @returns {Promise<{ isArchived: boolean }>} A promise that resolves to whether isArchived.
+   * @returns {Promise<ManagedUser>} A promise with the updated user object.
    * @throws {PermissionError} If the user lacks required permissions
    * @throws {APIError} If the response status code is not 200.
    */
-  async archiveUser(id: string): Promise<{ isArchived: boolean }> {
+  async archiveUser(id: string): Promise<ManagedUser> {
     const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.UserManagement.ArchiveUser;
 
     if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({
-        message: "You are not authorized to archive user accounts.",
+        message: "You are not authorized to archive users.",
         requiredPermissions: [requiredPerm],
       });
     }
 
     const result = await this.client.archiveUser({ params: { id } });
-    return this.handleResponse<{ isArchived: boolean }>(result, 200);
+    const data = this.handleResponse<ManagedUserData>(result, 201);
+    const managedUser = ManagedUser.from(data);
+    if (!managedUser) {
+      throw new Error("Invalid user data received from server");
+    }
+    return managedUser;
   }
 
   /**
    * Archives (soft deletes) a user account by ID.
    * @param {string} id - The unique identifier of the user account to archive.
-   * @returns {Promise<{ isArchived: boolean }>} A promise that resolves to whether isArchived.
+   * @returns {Promise<ManagedUser>} A promise with the updated user object.
    * @throws {PermissionError} If the user lacks required permissions
    * @throws {APIError} If the response status code is not 200.
    */
-  async unArchiveUser(id: string): Promise<{ isArchived: boolean }> {
+  async unArchiveUser(id: string): Promise<ManagedUser> {
     const auth = this.getAuthForPermissionCheck();
-    const requiredPerm = Permissions.UserManagement.ArchiveUser;
+    const requiredPerm = Permissions.UserManagement.UnArchiveUser;
 
     if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({
-        message: "You are not authorized to un-archive user accounts.",
+        message: "You are not authorized to un-archive users.",
         requiredPermissions: [requiredPerm],
       });
     }
 
-    const result = await this.client.unarchiveUser({ params: { id } });
-    return this.handleResponse<{ isArchived: boolean }>(result, 200);
+    const result = await this.client.unArchiveUser({ params: { id } });
+    const data = this.handleResponse<ManagedUserData>(result, 201);
+    const managedUser = ManagedUser.from(data);
+    if (!managedUser) {
+      throw new Error("Invalid user data received from server");
+    }
+    return managedUser;
   }
 
   /**
@@ -155,7 +166,7 @@ export class UserManagementRepository
       params: { id },
       body: input,
     });
-    return this.handleResponse<{ success: boolean }>(result, 200);
+    return this.handleResponse<{ success: boolean }>(result, 201);
   }
 
   /**
@@ -169,7 +180,9 @@ export class UserManagementRepository
    * const repository = new UserManagementRepository();
    * repository.getAllUsers().then(users => console.log(users));
    */
-  async getAllUsers(): Promise<ManagedUser[]> {
+  async getAllUsers(
+    query: ManagedUserQueryParams = { eager: "role" },
+  ): Promise<ManagedUser[]> {
     const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.UserManagement.ViewUsers;
 
@@ -180,7 +193,7 @@ export class UserManagementRepository
       });
     }
 
-    const result = await this.client.getUsers({ query: { eager: "role" } });
+    const result = await this.client.getUsers({ query });
     const data = this.handleResponse<ManagedUserData[]>(result, 200);
     return ManagedUser.createMany(data);
   }
@@ -196,7 +209,10 @@ export class UserManagementRepository
    * const repository = new UserManagementRepository();
    * repository.getUser('user-id').then(user => console.log(user));
    */
-  async getUser(id: string): Promise<ManagedUser> {
+  async getUser(
+    id: string,
+    query: ManagedUserQueryParams = { eager: "role" },
+  ): Promise<ManagedUser> {
     const auth = this.getAuthForPermissionCheck();
     const requiredPerm = Permissions.UserManagement.ViewUser;
 
@@ -207,10 +223,7 @@ export class UserManagementRepository
       });
     }
 
-    const result = await this.client.getUser({
-      params: { id },
-      query: { eager: "role" },
-    });
+    const result = await this.client.getUser({ params: { id }, query });
     const data = this.handleResponse<ManagedUserData>(result, 200);
     const managedUser = ManagedUser.from(data);
     if (!managedUser) {
@@ -264,7 +277,7 @@ export class UserManagementRepository
    */
   async getRole(id: string): Promise<Role> {
     const auth = this.getAuthForPermissionCheck();
-    const requiredPerm = Permissions.Role.ViewRoles;
+    const requiredPerm = Permissions.Role.ViewRole;
 
     if (!auth.checkPermission(requiredPerm)) {
       throw new PermissionError({

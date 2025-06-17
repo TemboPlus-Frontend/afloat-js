@@ -76,6 +76,7 @@ export interface ManagedUserData {
   roleId: string;
   resetPassword: boolean;
   isActive: boolean;
+  isArchived: boolean;
   role?: RoleData;
   createdAt: string;
   updatedAt: string;
@@ -90,6 +91,7 @@ export class ManagedUser extends UserEntity {
   public readonly roleId: string;
   public readonly resetPassword: boolean;
   public readonly isActive: boolean;
+  public readonly isArchived: boolean;
   public readonly role?: Role;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
@@ -107,6 +109,7 @@ export class ManagedUser extends UserEntity {
     this.roleId = data.roleId;
     this.resetPassword = data.resetPassword;
     this.isActive = data.isActive;
+    this.isArchived = data.isArchived;
     this.createdAt = new Date(data.createdAt);
     this.updatedAt = new Date(data.updatedAt);
 
@@ -127,6 +130,13 @@ export class ManagedUser extends UserEntity {
   }
 
   /**
+   * Check if user account is archived
+   */
+  isAccountArchived(): boolean {
+    return this.isArchived;
+  }
+
+  /**
    * Check if user needs to reset password
    */
   needsPasswordReset(): boolean {
@@ -137,11 +147,20 @@ export class ManagedUser extends UserEntity {
    * Get comprehensive account status
    */
   getAccountStatus(): {
-    status: "active" | "inactive" | "password_reset_required";
+    status: "active" | "inactive" | "archived" | "password_reset_required";
     label: string;
-    color: "success" | "warning" | "error";
+    color: "success" | "warning" | "error" | "default";
     description: string;
   } {
+    if (this.isArchived) {
+      return {
+        status: "archived",
+        label: "Archived",
+        color: "default",
+        description: "Account has been archived and is no longer accessible",
+      };
+    }
+
     if (!this.isActive) {
       return {
         status: "inactive",
@@ -226,6 +245,7 @@ export class ManagedUser extends UserEntity {
       roleId: this.roleId,
       resetPassword: this.resetPassword,
       isActive: this.isActive,
+      isArchived: this.isArchived,
       role: this.role?.toJSON(),
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
