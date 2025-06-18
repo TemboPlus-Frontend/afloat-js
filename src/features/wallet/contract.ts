@@ -13,10 +13,12 @@ export const contract = initContract().router({
   getBalance: {
     method: "POST",
     path: "/balance",
-    body: z.object({}),
+    body: z.object({
+      accountNo: z.string().optional(),
+    }),
     responses: {
       201: z.object({
-        availableBalance: z.number(),
+        availableBalance: z.coerce.number(),
       }),
     },
   },

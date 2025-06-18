@@ -1,9 +1,6 @@
 import { BaseRepository } from "@shared/base_repository.ts";
 import { contract } from "@features/wallet/contract.ts";
-import type {
-  Wallet,
-  WalletStatementItem,
-} from "@models/wallet/index.ts";
+import { Wallet, WalletStatementEntry } from "@models/wallet/index.ts";
 import type { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { PermissionError } from "@errors/index.ts";
@@ -33,7 +30,7 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @throws {Error} If the balance fetch operation fails
    * @returns {Promise<number>} The available balance amount
    */
-  async getBalance(): Promise<number> {
+  async getBalance(props: { accountNo: string }): Promise<number> {
     const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewBalance;
 
@@ -44,7 +41,9 @@ export class WalletRepo extends BaseRepository<typeof contract> {
       });
     }
 
-    const result = await this.client.getBalance();
+    const result = await this.client.getBalance({
+      body: { accountNo: props.accountNo },
+    });
 
     if (result.status === 201) {
       return result.body.availableBalance;
@@ -62,7 +61,7 @@ export class WalletRepo extends BaseRepository<typeof contract> {
     const result = await this.client.getWallets();
 
     if (result.status === 200) {
-      return result.body;
+      return result.body.map((w) => Wallet.from(w)!);
     }
 
     throw new Error("An error occured while fetching wallets");
@@ -78,14 +77,14 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @param {string} [props.accountNo] - Optional account number to fetch statement for
    * @throws {PermissionError} If user lacks the ViewStatement permission
    * @throws {Error} If the statement fetch operation fails
-   * @returns {Promise<WalletStatementItem[]>} Array of statement items for the specified period
+   * @returns {Promise<WalletStatementEntry[]>} Array of statement items for the specified period
    */
   async getStatement(
     props: {
       range?: { startDate: Date; endDate: Date };
       accountNo?: string;
     },
-  ): Promise<WalletStatementItem[]> {
+  ): Promise<WalletStatementEntry[]> {
     const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewStatement;
 
@@ -107,7 +106,7 @@ export class WalletRepo extends BaseRepository<typeof contract> {
     const result = await this.client.getStatement({ body });
 
     if (result.status === 201) {
-      return result.body;
+      return result.body.map((e) => WalletStatementEntry.from(e)!);
     }
 
     throw new Error("An error occured while fetching statement");
