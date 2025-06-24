@@ -1,9 +1,14 @@
 import { BaseRepository } from "@shared/base_repository.ts";
 import { contract } from "@features/wallet/contract.ts";
-import { Wallet, WalletStatementEntry } from "@models/wallet/index.ts";
+import {
+  Wallet,
+  type WalletSchemas,
+  WalletStatementEntry,
+} from "@models/wallet/index.ts";
 import type { AfloatAuth } from "@features/auth/manager.ts";
 import { Permissions } from "@models/permission.ts";
 import { PermissionError } from "@errors/index.ts";
+import type z from "zod";
 
 /**
  * Repository class for managing wallet operations including balance checking,
@@ -30,7 +35,7 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @throws {Error} If the balance fetch operation fails
    * @returns {Promise<number>} The available balance amount
    */
-  async getBalance(props: { accountNo: string }): Promise<number> {
+  async getBalance(props: { accountNo?: string }): Promise<number> {
     const auth = this.getAuthForPermissionCheck();
     const requirePerm = Permissions.Wallet.ViewBalance;
 
@@ -57,8 +62,10 @@ export class WalletRepo extends BaseRepository<typeof contract> {
    * @throws {Error} If the wallet fetch operation fails
    * @returns {Promise<Wallet[]>} Array of wallet objects
    */
-  async getWallets(): Promise<Wallet[]> {
-    const result = await this.client.getWallets();
+  async getWallets(
+    args?: z.infer<typeof WalletSchemas.walletQuery>,
+  ): Promise<Wallet[]> {
+    const result = await this.client.getWallets({ query: args });
 
     if (result.status === 200) {
       return result.body.map((w) => Wallet.from(w)!);

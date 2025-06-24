@@ -6,6 +6,7 @@ export const contract = initContract().router({
   getWallets: {
     method: "GET",
     path: "/",
+    query: WalletSchemas.walletQuery,
     responses: {
       200: z.array(WalletSchemas.wallet),
     },
