@@ -27,6 +27,7 @@ type PayoutStatusType = z.ZodEnum<[
   typeof PAYOUT_STATUS.REJECTED,
   typeof PAYOUT_STATUS.PENDING,
   typeof PAYOUT_STATUS.QUEUED,
+  typeof PAYOUT_STATUS.REVERSED,
 ]>;
 
 /**
@@ -183,6 +184,7 @@ const payoutStatusSchema: PayoutStatusType = z.enum([
   PAYOUT_STATUS.REJECTED,
   PAYOUT_STATUS.PENDING,
   PAYOUT_STATUS.QUEUED,
+  PAYOUT_STATUS.REVERSED,
 ]);
 
 /**

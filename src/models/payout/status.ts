@@ -16,6 +16,8 @@ export enum PAYOUT_STATUS {
   REJECTED = "REJECTED",
   /** Payout has been initially created but not yet processed */
   CREATED = "CREATED",
+
+  REVERSED = "REVERSED",
 }
 
 /**

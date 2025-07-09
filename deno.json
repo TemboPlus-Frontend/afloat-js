@@ -1,6 +1,6 @@
 {
     "name": "@temboplus/afloat",
-    "version": "0.1.51",
+    "version": "0.1.53",
     "license": "MIT",
     "exports": "./mod.ts",
     "tasks": {
