@@ -7,27 +7,33 @@ import type { RuleObject } from "antd/es/form";
  * 1. The name must consist of at least two words separated by one or more spaces.
  * 2. Each word can include alphabetic characters (a-z, A-Z) and special characters like
  *    hyphens (-), apostrophes ('), periods (.), and other Unicode letters.
- * 3. Both words must have at least two characters.
- * 4. Allow additional whitespace between words but disallow trailing or leading spaces.
- * 5. Supports names with special characters (e.g., "O'Connor", "St. John", "María-José")
+ * 3. Words can be single letters (e.g., "A", "B") or longer.
+ * 4. The entire name must contain at least two alphabetic characters total.
+ * 5. Allow additional whitespace between words but disallow trailing or leading spaces.
+ * 6. Supports names with special characters (e.g., "O'Connor", "St. John", "María-José")
  *
  * Examples of valid names:
  * - "John Doe"
+ * - "John A Doe"
+ * - "A B"
  * - "Anna-Marie Johnson"
  * - "Jean-Luc Picard"
  * - "Mary O'Connor"
  * - "St. John Smith"
  * - "María José"
  * - "François d'Arc"
+ * - "J Smith"
+ * - "John D"
+ * - "A Martinez"
  *
  * Examples of invalid names:
- * - "John" (only one name)
- * - "John D" (family name less than 2 characters)
+ * - "John" (only one word)
+ * - "A" (only one word, less than 2 letters total)
  * - "John123 Doe" (contains numeric characters)
  * - " John Doe " (leading or trailing spaces)
+ * - "- -" (no alphabetic characters)
  */
-const ACCOUNT_NAME_REGEX =
-  /^[\p{L}]['\p{L}.-]{1,}(?: [\p{L}]['\p{L}.-]{1,})+$/u;
+const ACCOUNT_NAME_REGEX = /^(?=.*\p{L}.*\p{L})[\p{L}]['\p{L}.-]*(?:\s+[\p{L}]['\p{L}.-]*)+$/u;
 
 /**
  * Regex pattern to validate account numbers.

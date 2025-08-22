@@ -63,7 +63,6 @@ Deno.test("validateAccName - invalid cases", () => {
     undefined,
     "",
     "John",
-    "J D",
     "John123 Doe",
     "-John Doe",
     "John-",
@@ -140,7 +139,6 @@ Deno.test("ACC_NAME_VALIDATOR - valid cases", async () => {
 Deno.test("ACC_NAME_VALIDATOR - invalid cases", async () => {
   const invalidCases = [
     "John",
-    "J D",
     "John123 Doe",
   ];
 
