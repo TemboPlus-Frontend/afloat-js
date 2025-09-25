@@ -6,7 +6,10 @@ import {
   type ContactInfo,
   MobileContactInfo,
 } from "@models/contact/index.ts";
-import { type PAYOUT_APPROVAL_STATUS, PAYOUT_STATUS } from "@models/payout/status.ts";
+import {
+  type PAYOUT_APPROVAL_STATUS,
+  PAYOUT_STATUS,
+} from "@models/payout/status.ts";
 import { createPayoutChannelCode } from "@models/payout/channel.ts";
 
 /**
@@ -115,6 +118,11 @@ export class Payout {
     return this.data.updatedAt;
   }
 
+  /** Timestamp when payout was last updated */
+  get actionedAt(): Date | undefined{
+    return this.data.actionedAt ?? undefined;
+  }
+
   /** Current approval status of the payout */
   get approvalStatus(): PAYOUT_APPROVAL_STATUS {
     return this.data.approvalStatus;
@@ -160,7 +168,8 @@ export class Payout {
     }
 
     // extracting bank contact information
-    const isBankPayout = this.data.channel === createPayoutChannelCode.bank() ||
+    const isBankPayout =
+      this.data.channel === createPayoutChannelCode.bank() ||
       this.data.channel === createPayoutChannelCode.verto();
     if (isBankPayout) {
       // getting bank information from payout msisdn

@@ -247,7 +247,7 @@ const payoutSchema: PayoutType = basePayoutSchema.extend({
   partnerReference: makeOptional(z.string()).optional(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  actionedAt: makeOptional(z.coerce.date()).optional(),
+  actionedAt: z.coerce.date().nullish(),
   approvalStatus: approvalPayoutStatusSchema,
   createdBy: makeOptional(identifierSchema).optional(),
   actionedBy: makeOptional(identifierSchema).optional(),
