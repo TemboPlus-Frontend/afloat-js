@@ -1,7 +1,7 @@
 # Makefile for publishing @temboplus/afloat to npm
 
 # Default version if not specified
-VERSION ?= 0.1.60
+VERSION ?= 0.1.78
 
 .PHONY: help build-npm publish-npm clean check-version check-login full-publish
 

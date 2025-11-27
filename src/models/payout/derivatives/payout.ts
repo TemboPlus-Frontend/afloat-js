@@ -119,8 +119,13 @@ export class Payout {
   }
 
   /** Timestamp when payout was last updated */
-  get actionedAt(): Date | undefined{
-    return this.data.actionedAt ?? undefined;
+  get actionedAt(): Date | undefined {
+    try {
+      // deno-lint-ignore no-explicit-any
+      return (this.data as any).actionedAt ?? undefined;
+    } catch (_) {
+      return undefined;
+    }
   }
 
   /** Current approval status of the payout */
